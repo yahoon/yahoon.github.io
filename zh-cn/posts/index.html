@@ -1,0 +1,58 @@
+<!doctype html><html lang=zh-cn dir=auto data-theme=auto><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>Posts | Yahoon 的技术博客</title><meta name=keywords content><meta name=description content="Posts - Yahoon 的技术博客"><meta name=author content><link rel=canonical href=https://yahoon.github.io/zh-cn/posts/><link crossorigin=anonymous href=/assets/css/stylesheet.6ff46447b1fa3f8a5cc0bcae48088decc3ae37f5fbc99406a3aefc3bf0e6044a.css integrity="sha256-b/RkR7H6P4pcwLyuSAiN7MOuN/X7yZQGo678O/DmBEo=" rel="preload stylesheet" as=style><link rel=icon href=https://yahoon.github.io/favicon.ico><link rel=icon type=image/png sizes=16x16 href=https://yahoon.github.io/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=https://yahoon.github.io/favicon-32x32.png><link rel=apple-touch-icon href=https://yahoon.github.io/apple-touch-icon.png><link rel=mask-icon href=https://yahoon.github.io/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate type=application/rss+xml href=https://yahoon.github.io/zh-cn/posts/index.xml title=rss><link rel=alternate hreflang=en href=https://yahoon.github.io/posts/><link rel=alternate hreflang=zh-cn href=https://yahoon.github.io/zh-cn/posts/><noscript><style>#theme-toggle,.top-link{display:none}</style><style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--code-block-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51);color-scheme:dark}.list{background:var(--theme)}.toc{background:var(--entry)}}</style></noscript><script>localStorage.getItem("pref-theme")==="dark"?document.querySelector("html").dataset.theme="dark":localStorage.getItem("pref-theme")==="light"?document.querySelector("html").dataset.theme="light":window.matchMedia("(prefers-color-scheme: dark)").matches?document.querySelector("html").dataset.theme="dark":document.querySelector("html").dataset.theme="light"</script><meta property="og:url" content="https://yahoon.github.io/zh-cn/posts/"><meta property="og:site_name" content="Yahoon 的技术博客"><meta property="og:title" content="Posts"><meta property="og:locale" content="zh_cn"><meta property="og:type" content="website"><meta name=twitter:card content="summary"><meta name=twitter:title content="Posts"><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Posts","item":"https://yahoon.github.io/zh-cn/posts/"}]}</script></head><body class=list id=top><header class=header><nav class=header-nav><div class=logo><a href=https://yahoon.github.io/zh-cn/ accesskey=h title="Yahoon 的技术博客 (Alt + H)">Yahoon 的技术博客</a><div class=logo-switches><button id=theme-toggle class=theme-toggle accesskey=t title="(Alt + T)" aria-label="Toggle theme">
+<svg class="moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+<svg class="sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+</button><span class=nav-sep>|</span><ul class=lang-menu><li><a href=https://yahoon.github.io/ title=English aria-label=English>English</a></li></ul></div></div><ul id=menu class=menu><li><a href=https://yahoon.github.io/zh-cn/posts/about-me/ title=关于我><span>关于我</span></a></li></ul></nav></header><main class=main><header class=page-header><h1>Posts</h1></header><article class=post-entry><header class=entry-header><h2 class=entry-hint-parent>在Fedora上安装词典</h2></header><div class=entry-content><p>介绍 作为离职流程的一部分，我不得不重新配置我的个人笔记本。 一切都要重新开始， 从iso 系统镜像，到系统安装，到配置到可以工作, 它并没有看起来那么容易。
+尤其是我发现即使一些最普通的工具我都要从头开始学习和安装时。（也可能我之前关注的太少）。
+对于母语非英语的人士， 词典是必须品。 可惜我喜欢的沉浸式翻译竟然没有PC 客户端。
+已经把Linux作为桌面系统已经十余年了。 或许是因为习惯，抑或是有点懒。 我还是会把相当部分的工作使用Linux桌面完成。所以我就 Fedora上最有名的词典工具 Goldendict。
+Goldendict Home page: http://goldendict.org/ Github page: https://github.com/goldendict/goldendict/tree/master // 这是老的版本， 现在有了新版，叫做 goldendict-ng Goldendict-ng https://github.com/xiaoyifang/goldendict-ng
+文档： https://xiaoyifang.github.io/goldendict-ng/
+安装 我们使用F43, 直接安装新的ng版本：
+❯ sudo dnf install goldendict-ng
+// 如果要安装旧版 ❯ sudo dnf install goldendict
+启动 命令行启动 直接运行 goldendict-ng 会报错 Segmentation fault (core dumped)， 运行如下命令来启动
+QT_QPA_PLATFORM=xcb goldendict-ng 菜单启动 ❯ cp /usr/share/applications/io.github.xiaoyifang.goldendict_ng.desktop ~/.local/share/applications/ ❯ vi ~/.local/share/applications/io.github.xiaoyifang.goldendict_ng.desktop // 找到 `Exec=` 这一行，修改为： Exec=env QT_QPA_PLATFORM=xcb goldendict-ng %u 增加词典 刚安装好的 GoldenDict-NG 可能是空的。你可以通过以下两种方式让它支持中英文互译：
+...</p></div><footer class=entry-footer><span title='2026-05-19 00:00:00 +0000 UTC'>May 19, 2026</span></footer><a class=entry-link aria-label="post link to 在Fedora上安装词典" href=https://yahoon.github.io/zh-cn/posts/install-dict-on-fedora/></a></article><article class=post-entry><header class=entry-header><h2 class=entry-hint-parent>小九 - 我的小猫</h2></header><div class=entry-content><p>介绍我的小猫 - 小九 身份 姓名： 小九
+出生年月： 2022年2月
+性别： 雄性
+性格： 懒，时而温顺，时而暴躁， 话不多
+来历 它是一只流浪猫，在2022年3月3日，刚满一个月的它钻到了我的车里。 从此它就正式成为我们家庭的一员了。
+它的名字就来自于这个特殊的日子， 3月3日，不自觉的就想起了《九九乘法表》里面的“三三得九”。
+日常</p></div><footer class=entry-footer><span title='2026-05-18 00:00:00 +0000 UTC'>May 18, 2026</span></footer><a class=entry-link aria-label="post link to 小九 - 我的小猫" href=https://yahoon.github.io/zh-cn/posts/about-xiaojiu/></a></article><article class=post-entry><header class=entry-header><h2 class=entry-hint-parent>在Windows 11 安装WSL</h2></header><div class=entry-content><p>Intro WSL: Windows Subsystem for Linux
+WSL是嵌在Windows里面的超小Linux VM, 默认是ubuntu
+主页： https://github.com/microsoft/WSL
+一键安装（在线安装） wsl --install 问题： wsl --install 非常慢，主要是因为微软境外源在国内带宽差。最快解决：离线手动安装（国内镜像下载），几分钟搞定
+手工安装（离线安装） 前置说明 Windows11 家庭版完全支持 WSL2，无需 Hyper-V，只用开启两个系统功能、安装你下载的 MSI、导入 wsl 镜像即可，全程离线可用。
+步骤 0：下载 wsl程序 https://github.com/microsoft/WSL/releases 下载 wsl.2.7.3.0.x64.msi文件
+Ubuntu wsl文件 根据 https://github.com/microsoft/WSL/blob/master/distributions/DistributionInfo.json 文件，里面有各个distro的url。
+找到https://releases.ubuntu.com/26.04/ 的 WSL image的下载链接， 下载ubuntu-26.04-wsl-amd64.wsl文件
+把以上两个文件放在一个全英文的路径下比如： D:\wsl
+附加国内高速地址（未验证）
+用浏览器 / 迅雷下载：
+WSL2 内核（msi） - 地址：https://gh-proxy.org/https://github.com/microsoft/WSL/releases/download/2.7.1/wsl.2.7.1.0.x64.msi Ubuntu 22.04（tar.gz）（清华镜像） - 地址：https://mirrors.tuna.tsinghua.edu.cn/ubuntu-releases-wsl/22.04/ubuntu-22.04-wsl-amd64.tar.gz 保存到：D:\wsl\（纯英文路径）
+步骤 1：开启 WSL 必备系统功能 右键开始菜单 → 选择Windows 终端 (管理员) 或 PowerShell (管理员) 依次执行两条命令，不用重启： dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart 重启电脑生效 步骤 2：安装 WSL 核心 MSI 包 找到你下载的 wsl.2.7.3.0.x64.msi 双击直接安装，一路下一步默认即可 安装完关闭窗口，不用额外配置 步骤 3：导入 Ubuntu26.04 .wsl 镜像 双击ubuntu-26.04-wsl-amd64.wsl 文件，会自动倒入。
+...</p></div><footer class=entry-footer><span title='2026-05-15 00:00:00 +0000 UTC'>May 15, 2026</span></footer><a class=entry-link aria-label="post link to 在Windows 11 安装WSL" href=https://yahoon.github.io/zh-cn/posts/install-wsl-on-win11/></a></article><article class=post-entry><header class=entry-header><h2 class=entry-hint-parent>关于我</h2></header><div class=entry-content><p>个人简介 姚洪 （Yahoon Yao） 工程师、开源倡导者、技术写作者、终身学习者
+拥有超过20年经验的IT老兵，涵盖Linux、云计算、AWS、Ansible、基础设施运维和DevOps等领域。
+关于我的一些关键词：开源 | Linux | SRE | 云计算 | AWS | GCP | Terraform | Golden VM镜像构建 | DevOps | CI/CD | Kubernetes | Python | Go | AI编程 | 监控
+详细信息 20年以上企业级运维与管理经验，专注于基础设施和应用运维。精通从流程标准化到落地执行的全链路运维管理，具备扎实的理论基础和丰富的实践经验。
+精通Red Hat全系列产品，熟练运用Linux、Ansible、Satellite、OpenShift、OpenStack等核心工具，具备全栈运维能力。
+擅长DevOps自动化及CI/CD流水线（GitLab、Tekton）。
+熟练使用Python、Bash、Go进行自动化服务与工具独立开发，善于借助AI工具（Claude、OpenCode、Skills）提升工作效率。
+优秀的书面与口头表达能力，注重知识的标准化、代码化与文档化。具备出色的团队管理、培训与指导能力。
+自驱力强，对AI、IaaS、SRE等新兴技术有浓厚兴趣，持续学习与迭代。
+流利的英文书面与口头沟通能力，能够无缝进行跨境协作。
+语言：中文（母语）、英语。
+另有一个访问量超过170万的中文博客，用于分享知识与思考。
+认证 CKA（认证Kubernetes管理员）
+RHCA（红帽认证架构师）
+AWS解决方案架构师
+CSM （认证Scrum Master）
+ITIL Foundation
+Zabbix认证专家
+PMI认证项目管理专业人士（PMP）
+联系我 LinkedIn
+邮箱</p></div><footer class=entry-footer><span title='2026-05-14 00:00:00 +0000 UTC'>May 14, 2026</span></footer><a class=entry-link aria-label="post link to 关于我" href=https://yahoon.github.io/zh-cn/posts/about-me/></a></article></main><footer class=footer><span>&copy; 2026 <a href=https://yahoon.github.io/zh-cn/>Yahoon 的技术博客</a></span> ·
+<span>Powered by
+<a href="https://gohugo.io/?utm_source=papermod" rel=noopener target=_blank>Hugo</a> &
+<a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top id=top-link class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey=g><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>
+</a><script>let menu=document.getElementById("menu");if(menu){const e=localStorage.getItem("menu-scroll-position");e&&(menu.scrollLeft=parseInt(e,10)),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}}document.querySelectorAll('a[href^="#"]').forEach(e=>{e.addEventListener("click",function(e){e.preventDefault();var t=this.getAttribute("href").substr(1);window.matchMedia("(prefers-reduced-motion: reduce)").matches?document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView({behavior:"smooth"}),t==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${t}`)})})</script><script>var toplink=document.getElementById("top-link");window.onscroll=function(){const e=window.innerHeight;document.body.scrollTop>e||document.documentElement.scrollTop>e?toplink.classList.remove("hidden"):toplink.classList.add("hidden")}</script><script>document.getElementById("theme-toggle").addEventListener("click",()=>{const e=document.querySelector("html");e.dataset.theme==="dark"?(e.dataset.theme="light",localStorage.setItem("pref-theme","light")):(e.dataset.theme="dark",localStorage.setItem("pref-theme","dark"))})</script></body></html>
