@@ -1,0 +1,101 @@
+<!doctype html><html lang=zh-cn dir=auto data-theme=auto><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>Posts | Yahoon 的技术博客</title><meta name=keywords content><meta name=description content="Posts - Yahoon 的技术博客"><meta name=author content><link rel=canonical href=https://yahoon.github.io/zh-cn/posts/><link crossorigin=anonymous href=/assets/css/stylesheet.657e075e7c5596b5a605862ac3ab6ef5e945dbab9737b155c0a1c1164e23c870.css integrity="sha256-ZX4HXnxVlrWmBYYqw6tu9elF26uXN7FVwKHBFk4jyHA=" rel="preload stylesheet" as=style><link rel=icon href=https://yahoon.github.io/favicon.ico><link rel=icon type=image/png sizes=16x16 href=https://yahoon.github.io/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=https://yahoon.github.io/favicon-32x32.png><link rel=apple-touch-icon href=https://yahoon.github.io/apple-touch-icon.png><link rel=mask-icon href=https://yahoon.github.io/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate type=application/rss+xml href=https://yahoon.github.io/zh-cn/posts/index.xml title=rss><link rel=alternate hreflang=en href=https://yahoon.github.io/posts/><link rel=alternate hreflang=zh-cn href=https://yahoon.github.io/zh-cn/posts/><noscript><style>#theme-toggle,.top-link{display:none}</style><style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--code-block-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51);color-scheme:dark}.list{background:var(--theme)}.toc{background:var(--entry)}}</style></noscript><script>localStorage.getItem("pref-theme")==="dark"?document.querySelector("html").dataset.theme="dark":localStorage.getItem("pref-theme")==="light"?document.querySelector("html").dataset.theme="light":window.matchMedia("(prefers-color-scheme: dark)").matches?document.querySelector("html").dataset.theme="dark":document.querySelector("html").dataset.theme="light"</script><meta property="og:url" content="https://yahoon.github.io/zh-cn/posts/"><meta property="og:site_name" content="Yahoon 的技术博客"><meta property="og:title" content="Posts"><meta property="og:locale" content="zh_cn"><meta property="og:type" content="website"><meta name=twitter:card content="summary"><meta name=twitter:title content="Posts"><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Posts","item":"https://yahoon.github.io/zh-cn/posts/"}]}</script></head><body class=list id=top><header class=header><nav class=header-nav><div class=logo><a href=https://yahoon.github.io/zh-cn/ accesskey=h title="Yahoon 的技术博客 (Alt + H)">Yahoon 的技术博客</a><div class=logo-switches><button id=theme-toggle class=theme-toggle accesskey=t title="(Alt + T)" aria-label="Toggle theme">
+<svg class="moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+<svg class="sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+</button><span class=nav-sep>|</span><ul class=lang-menu><li><a href=https://yahoon.github.io/ title=English aria-label=English>English</a></li></ul></div></div><ul id=menu class=menu><li><a href=https://yahoon.github.io/zh-cn/posts/about-me/ title=关于我><span>关于我</span></a></li></ul></nav></header><main class=main><header class=page-header><h1>Posts</h1></header><article class=post-entry><header class=entry-header><h2 class=entry-hint-parent>以tgz包的形式来安装Helm Chart</h2></header><div class=entry-content><p>> 「本文同步首发于个人博客 yahoon.github.io，原创内容，转载请注明出处」
+Helm Chart的离线安装（tar.gz文件） 最近在学习helm, 作为运维，以前对这个K8s的应用部署接触的不多， 这几天正好实践操作一下。
+使用官方给的podinfo 这个chart， 具体步骤如下:
+Step 1: 拉取Chart chart 包本身就是一个tar.gz 的包
+首先说明 chart 包的发布有两个渠道
+HTTP repo （比如artifact hub） OCI地址（oci://ghcr.io/...，也就是类似于docker hub）是Chart作者额外发布到OCI registry的 具体发布到哪里，要看作者的意愿 学习 helm pull 命令
+❯ helm pull --help Retrieve a package from a package repository, and download it locally. Usage: helm pull [chart URL | repo/chartname] [...] [flags] 拉取chart 到本地也可以有两种方式 (具体看chart 在哪里):
+OCI registry拉取 这个oci// 地址一般由作者提供
+helm pull oci://ghcr.io/stefanprodan/charts/podinfo --version 6.11.2 HTTP repo拉取 首先获得 chart的名字和repo
+❯ helm search hub podinfo --list-repo-url URL CHART VERSION APP VERSION DESCRIPTION REPO URL https://artifacthub.io/packages/helm/podinfo/po... 6.13.0 6.13.0 Podinfo Helm chart for Kubernetes https://stefanprodan.github.io/podinfo https://artifacthub.io/packages/helm/flagger/po... 6.1.4 6.1.3 Flagger canary deployment demo application https://flagger.app // 第一个URL是这个的网页（太长被截断了）, 后面是REPO URL // 问题： 这里看不到chart 名字 // 所以要查看完整信息 ❯ helm search hub podinfo --list-repo-url -o yaml - app_version: 6.13.0 description: Podinfo Helm chart for Kubernetes repository: name: podinfo url: https://stefanprodan.github.io/podinfo // 这个是repo URL url: https://artifacthub.io/packages/helm/podinfo/podinfo //这个是chart网页 version: 6.13.0 注意chart网页的 URL ： 从里面拆解出chart的名字
+...</p></div><footer class=entry-footer><span title='2026-06-09 00:00:00 +0000 UTC'>June 9, 2026</span></footer><a class=entry-link aria-label="post link to 以tgz包的形式来安装Helm Chart" href=https://yahoon.github.io/zh-cn/posts/install-helm-chart-from-tgz/></a></article><article class=post-entry><header class=entry-header><h2 class=entry-hint-parent>创建个人的密码管理器: VaultWarden</h2></header><div class=entry-content><p>安装密码管理服务器 VaultWarden 背景 我一直使用bitwarden web 作为我的密码管理器，但是有些问题逐渐浮现：
+国内访问一直比较慢，可能是它的服务器在国外的原因 万一哪天被禁止访问了，该怎么办 经过一番比较和研究，我选择内部部署 VaultWarden
+为什么是它？ VaultWarden! 自己部署bitwarden的成本: 虽然官方 Bitwarden 支持私人部署，但是由于它本身后端是用 .NET 写的，非常吃内存（通常需要 2GB~4GB RAM 以上），对我自己PC来说极不友好。而 Vaultwarden 极其轻量，只需要几十 MB 的内存就能流畅运行。 兼容性: Vaultwarden完全兼容 Bitwarden 的官方 App 和浏览器插件。你只需要在客户端登录时，将“自定域（Self-hosted URL）”填写为你自己搭建的网址即可。 部署方式: Vaultwarden支持podman / Docker 一键部署， 而bitwarden需要的是docker/docker compose。 介绍 项目主页： https://github.com/dani-garcia/vaultwarden
+完全开源， 部署非常简单。
+支持网页，Bitwarden 的官方 App 和浏览器插件访问。
+宿主机 我将以我的台式机作为宿主机（OS: Ubuntu 26.04, IP: 192.168.1.4）
+部署过程 Step 0: 准备SSL 证书 VaultWarden 只有在HTTPS下才工作， 所以要先准备好服务器证书
+在上一篇文章中我已经创建好了证书。
+> mkdir /home/yahoon/srv/vaultwarden/{data,ssl} // move the key files ❯ mv vault.pem vault-key.pem srv/vaultwarden/ssl/ ❯ ls srv/vaultwarden/ssl/ vault-key.pem vault.pem Step 1: 准备镜像 在客户机上：
+...</p></div><footer class=entry-footer><span title='2026-06-03 00:00:00 +0000 UTC'>June 3, 2026</span></footer><a class=entry-link aria-label="post link to  创建个人的密码管理器: VaultWarden" href=https://yahoon.github.io/zh-cn/posts/setup-vaultwarden/></a></article><article class=post-entry><header class=entry-header><h2 class=entry-hint-parent>为内网创建Root CA</h2></header><div class=entry-content><p>为内网创建Root CA 因为我的内网的很多服务都是直接用IP运行的，这个带来的安全威胁不容忽视。在一个隔离的环境中，建立本地局域网的local Root CA非常重要。
+使用的工具也非常简单=> mkcert
+介绍 mkcert mkcert 是一个0配置的本地CA 方案。
+开源项目： https://github.com/FiloSottile/mkcert
+安装环境 我把我的台式机作为宿主服务器（Ubuntu 26.04）,IP: 192.168.1.4
+安装与部署 sudo apt install libnss3-tools mkcert // fedora上是nss-tools mkcert 这2个包 创建本地root CA ❯ mkcert --install Created a new local CA 💥 The local CA is now installed in the system trust store! ⚡️ The local CA is now installed in the Firefox and/or Chrome/Chromium trust store (requires browser restart)! 🦊 // 可见它已经导入了本机 创建第一个证书 我的机器都是用IP直接访问的，服务器的IP是 192.168.1.4。 所以我的证书也是直接基于IP创建的
+// vault.pem 是 证书文件 // vault-key.pem 是 私钥文件 ❯ mkcert -cert-file vault.pem -key-file vault-key.pem 192.168.1.4 localhost 127.0.0.1 Created a new certificate valid for the following names 📜 - "192.168.1.4" - "localhost" - "127.0.0.1" The certificate is at "vault.pem" and the key at "vault-key.pem" ✅ It will expire on 27 August 2028 🗓 查看 root CA 我们经常需要把root ca导入到客户机器，这样它们在访问这个CA 签发https网站时就不会报错了
+// 获得本地 root CA的目录 ❯ mkcert -CAROOT /home/yahoon/.local/share/mkcert ❯ cat /home/yahoon/.local/share/mkcert/rootCA rootCA-key.pem rootCA.pem // rootCA.pem 是可以被共享的pub 证书 // rootCA-key.pm 是私钥，必须保密，永不泄漏 导入到客户端机器 以Fedora的客户机为例
+...</p></div><footer class=entry-footer><span title='2026-05-28 00:00:00 +0000 UTC'>May 28, 2026</span></footer><a class=entry-link aria-label="post link to 为内网创建Root CA" href=https://yahoon.github.io/zh-cn/posts/create-rootca/></a></article><article class=post-entry><header class=entry-header><h2 class=entry-hint-parent>快速安装Semaphore UI</h2></header><div class=entry-content><p>背景 我是一名 Ansible Automation Platform （AAP）的资深用户，深切感受到一个自动化平台的重要性。作为AAP的上游， AWX 这个开源项目已经许久没有更新，最新版本还停留在 2024年.
+这让我不得不寻求其他的替代工具。
+通过AI 搜索，Semaphore UI 脱颖而出。 它是一个类AAP的自动化运维平台， 有Web UI 且不光支持ansible, 还有terraform等。
+官网： https://semaphoreui.com/
+开源项目： https://github.com/semaphoreui/semaphore
+宿主服务器 我将我的台式机部署服务器
+OS: Ubuntu 26.04 ， 已经安装有 podman
+Semaphore Install 根据github主页推荐， 使用容器安装
+若要下载其他格式，可参考：
+在主页上有安装向导 https://semaphoreui.com/install 下载各种包的地址： https://github.com/semaphoreui/semaphore/releases 打开 Docker安装引导页面 https://semaphoreui.com/install/docker/2_18 ， 填入定制化的选项，它就会自动生成命令
+它给我的命令是
+docker run --name semaphore \ -p 3000:3000 \ -e SEMAPHORE_DB_DIALECT=sqlite \ -e SEMAPHORE_ADMIN=admin \ -e SEMAPHORE_ADMIN_PASSWORD=admin \ -e SEMAPHORE_ADMIN_NAME="Admin" \ -e SEMAPHORE_ADMIN_EMAIL=semaphore-admin@yahoon.io \ -v semaphore_data:/var/lib/semaphore \ -v semaphore_config:/etc/semaphore \ -v semaphore_tmp:/tmp/semaphore \ -d semaphoreui/semaphore:v2.18.0 准备semaphore 镜像 因为是homelab, 访问不了docker hub，所以我要先在开代理的模式下将以下镜像拉到本地
+...</p></div><footer class=entry-footer><span title='2026-05-27 00:00:00 +0000 UTC'>May 27, 2026</span></footer><a class=entry-link aria-label="post link to 快速安装Semaphore UI" href=https://yahoon.github.io/zh-cn/posts/install-semaphore/></a></article><article class=post-entry><header class=entry-header><h2 class=entry-hint-parent>Home Lab诡异的机器互访失灵</h2></header><div class=entry-content><p>介绍 在我的Home lab里面，我有两台Linux 机器：
+Ubuntu 26.04 （IP: 192.168.1.4): 作为我的测试服务器，上面运行着我的PoC 环境 Fedora 44（IP: 192.168.1.142)：作为我的工作主机 一直以来，他们都工作的非常良好（我讨厌开机，登陆，和重新点开各个应用的等待时间，所以很少关机）。 每天我从我的工作机远程登录到ubuntu 服务器上做各种测试，直到这个周一。
+问题描述 周一的早上，我继续准备从工作机ssh 到ubuntu 服务器上。 我看到之前的会话已经超时断开了，这是预想之中的，不值得大惊小怪。但是当我重新执行历史命令 ssh 192.168.1.4时， 它竟然不动了。我再次确认，ping 也不行了。
+我做了如下检查：
+两台机器都可以访问外网 ping baidu.com 和网关 192.168.1.1 =》 OK 访问外部网页 =》 OK ip route show 显示路由和出口都正确 两台机器之间无法互通，ping和ssh都不行 # ping 192.168.1.4 PING 192.168.1.4 (192.168.1.4) 56(84) bytes of data. From 192.168.1.142 icmp_seq=4 Destination Host Unreachable ping: sendmsg: No route to host 两台机器的网络连接正常 ubuntu是有线连接 fedora是无线连接 排错 防火墙 第一反应是防火墙问题：
+我把firewall service 完全关闭，但是不起作用
+...</p></div><footer class=entry-footer><span title='2026-05-25 00:00:00 +0000 UTC'>May 25, 2026</span></footer><a class=entry-link aria-label="post link to Home Lab诡异的机器互访失灵" href=https://yahoon.github.io/zh-cn/posts/pcs-access-inside-homelab/></a></article><article class=post-entry><header class=entry-header><h2 class=entry-hint-parent>一场面试之后的思考</h2></header><div class=entry-content><p>过程与反思 最近参与了几个面试，有一些总结和反思。
+昨天参加了一个面试。面试官问我：
+“最近在做啥？” “整理过去” “有那么多要整理吗？” “小二十年了积累的东西，能不多吗？” 即使就这最近的12年多的在红帽的所得，都还没有整理完。
+在近20年的时间里面，基本就是前一天刚从上一家公司离职，第二天就进入新公司入职了。
+尤其是一个运维人， 很少有超过三天不看工作相关的东西。
+我应该是那种爱好广泛的人。 对啥都感兴趣，都想学。 现在就有了选择困难症。是坚持做技术还是开启新的赛道？
+如果是坚持做技术，那么要充电： 审视自己的知识短板，有针对性的补足。
+如果是转方向： 是做自媒体，还是接触新的行业？ 即使是做自媒体也有一万种要考虑的方向： 是继续做技术？还是转更人文的方向？
+有一万条路可走。。。但大抵是迷茫，没有方向。但是我暂时的计划是还是继续精进自己，尽量还继续在技术的道路上寻找机会。
+同时也持开放的心态去接触新的事物，做一些新的探索。
+如果你也处于这个阶段， 让我们的一起摸索同行！
+我最近的日志</p></div><footer class=entry-footer><span title='2026-05-22 00:00:00 +0000 UTC'>May 22, 2026</span></footer><a class=entry-link aria-label="post link to 一场面试之后的思考" href=https://yahoon.github.io/zh-cn/posts/thoughts-interview-0522/></a></article><article class=post-entry><header class=entry-header><h2 class=entry-hint-parent>为Home Lab搭建Container Registry</h2></header><div class=entry-content><p>介绍 我正在构建我的Home lab。 以前在公司各种服务都是开箱即用，我根本不会考虑某个服务被墙或者网速慢的问题。
+可是home lab的网络环境很多网站不可以访问，或者说找不到免费的替代品, 最典型的就是docker hub。 所有只有自己搭建了。
+我的需求很简单：
+只给home lab 内网使用 内网的任意机器可以push 和pull 镜像 http访问就行 (without https) 认证也不需要 服务器 My desktop:
+OS: Ubuntu 26.04 IP: 192.168.1.4 暴露主机端口： 192.168.1.4:5000 当前普通用户 yahoon (有sudo权限) Steps 创建数据的持久化目录 registry data 放在当前用户 srv/registry 下
+❯ cd /home/yahoon/srv // 数据放在专有的数据盘上 ❯ mkdir /home/yahoon/mnt/registry ❯ ln -s /home/yahoon/mnt/registry/ . > ll lrwxrwxrwx 1 yahoon yahoon registry@ -> /home/yahoon/mnt/registry/ 在防火墙上放开 5000/tcp 端口 > sudo ufw allow 5000/tcp > sudo ufw reload 启动 Registry 容器 我们给容器起名字为local-registry:
+// 这个需要打开代理 > podman run -d \ -p 5000:5000 \ --name local-registry \ -v /home/yahoon/srv/registry:/var/lib/registry \ docker.io/library/registry:2 // 因为是Ubuntu, 所以-v后面不需要:Z, 那是只适用于Selinux > podman ps CONTAINER ID IMAGE COMMAND CREATED STATUS PORTS NAMES 9019e58b7e71 docker.io/library/registry:2 /etc/docker/regis... 3 seconds ago Up 3 seconds 0.0.0.0:5000->5000/tcp local-registry 开启用户进程常驻 在 Ubuntu / RHEL / Fedora 中，如果普通用户 yahoon 断开了 SSH 连接（登出），系统默认会回收该用户的所有后台进程（容器也会随之挂起）。执行以下命令，允许 yahoon 用户的服务在不登录时依然在后台保持运行：
+...</p></div><footer class=entry-footer><span title='2026-05-20 00:00:00 +0000 UTC'>May 20, 2026</span></footer><a class=entry-link aria-label="post link to 为Home Lab搭建Container Registry" href=https://yahoon.github.io/zh-cn/posts/install-registry-for-homelab/></a></article><article class=post-entry><header class=entry-header><h2 class=entry-hint-parent>在Fedora上安装词典</h2></header><div class=entry-content><p>介绍 作为离职流程的一部分，我不得不重新配置我的个人笔记本。 一切都要重新开始， 从iso 系统镜像，到系统安装，到配置到可以工作, 它并没有看起来那么容易。
+尤其是我发现即使一些最普通的工具我都要从头开始学习和安装时。（也可能我之前关注的太少）。
+对于母语非英语的人士， 词典是必须品。 可惜我喜欢的沉浸式翻译竟然没有PC 客户端。
+已经把Linux作为桌面系统已经十余年了。 或许是因为习惯，抑或是有点懒。 我还是会把相当部分的工作使用Linux桌面完成。所以我就 Fedora上最有名的词典工具 Goldendict。
+Goldendict Home page: http://goldendict.org/ Github page: https://github.com/goldendict/goldendict/tree/master // 这是老的版本， 现在有了新版，叫做 goldendict-ng Goldendict-ng https://github.com/xiaoyifang/goldendict-ng
+文档： https://xiaoyifang.github.io/goldendict-ng/
+安装 我们使用F43, 直接安装新的ng版本：
+❯ sudo dnf install goldendict-ng
+// 如果要安装旧版 ❯ sudo dnf install goldendict
+启动 命令行启动 直接运行 goldendict-ng 会报错 Segmentation fault (core dumped)， 运行如下命令来启动
+QT_QPA_PLATFORM=xcb goldendict-ng 菜单启动 ❯ cp /usr/share/applications/io.github.xiaoyifang.goldendict_ng.desktop ~/.local/share/applications/ ❯ vi ~/.local/share/applications/io.github.xiaoyifang.goldendict_ng.desktop // 找到 `Exec=` 这一行，修改为： Exec=env QT_QPA_PLATFORM=xcb goldendict-ng %u 增加词典 刚安装好的 GoldenDict-NG 可能是空的。你可以通过以下两种方式让它支持中英文互译：
+...</p></div><footer class=entry-footer><span title='2026-05-19 00:00:00 +0000 UTC'>May 19, 2026</span></footer><a class=entry-link aria-label="post link to 在Fedora上安装词典" href=https://yahoon.github.io/zh-cn/posts/install-dict-on-fedora/></a></article><article class=post-entry><header class=entry-header><h2 class=entry-hint-parent>小九 - 我的小猫</h2></header><div class=entry-content><p>介绍我的小猫 - 小九 身份 姓名： 小九
+出生年月： 2022年2月
+性别： 雄性
+性格： 懒，时而温顺，时而暴躁， 话不多
+来历 它是一只流浪猫，在2022年3月3日，刚满一个月的它钻到了我的车里。 从此它就正式成为我们家庭的一员了。
+它的名字就来自于这个特殊的日子， 3月3日，不自觉的就想起了《九九乘法表》里面的“三三得九”。
+日常</p></div><footer class=entry-footer><span title='2026-05-18 00:00:00 +0000 UTC'>May 18, 2026</span></footer><a class=entry-link aria-label="post link to 小九 - 我的小猫" href=https://yahoon.github.io/zh-cn/posts/about-xiaojiu/></a></article><article class=post-entry><header class=entry-header><h2 class=entry-hint-parent>在Windows 11 安装WSL</h2></header><div class=entry-content><p>Intro WSL: Windows Subsystem for Linux
+WSL是嵌在Windows里面的超小Linux VM, 默认是ubuntu
+主页： https://github.com/microsoft/WSL
+一键安装（在线安装） wsl --install 问题： wsl --install 非常慢，主要是因为微软境外源在国内带宽差。最快解决：离线手动安装（国内镜像下载），几分钟搞定
+手工安装（离线安装） 前置说明 Windows11 家庭版完全支持 WSL2，无需 Hyper-V，只用开启两个系统功能、安装你下载的 MSI、导入 wsl 镜像即可，全程离线可用。
+步骤 0：下载 wsl程序 https://github.com/microsoft/WSL/releases 下载 wsl.2.7.3.0.x64.msi文件
+Ubuntu wsl文件 根据 https://github.com/microsoft/WSL/blob/master/distributions/DistributionInfo.json 文件，里面有各个distro的url。
+找到https://releases.ubuntu.com/26.04/ 的 WSL image的下载链接， 下载ubuntu-26.04-wsl-amd64.wsl文件
+把以上两个文件放在一个全英文的路径下比如： D:\wsl
+附加国内高速地址（未验证）
+用浏览器 / 迅雷下载：
+WSL2 内核（msi） - 地址：https://gh-proxy.org/https://github.com/microsoft/WSL/releases/download/2.7.1/wsl.2.7.1.0.x64.msi Ubuntu 22.04（tar.gz）（清华镜像） - 地址：https://mirrors.tuna.tsinghua.edu.cn/ubuntu-releases-wsl/22.04/ubuntu-22.04-wsl-amd64.tar.gz 保存到：D:\wsl\（纯英文路径）
+步骤 1：开启 WSL 必备系统功能 右键开始菜单 → 选择Windows 终端 (管理员) 或 PowerShell (管理员) 依次执行两条命令，不用重启： dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart 重启电脑生效 步骤 2：安装 WSL 核心 MSI 包 找到你下载的 wsl.2.7.3.0.x64.msi 双击直接安装，一路下一步默认即可 安装完关闭窗口，不用额外配置 步骤 3：导入 Ubuntu26.04 .wsl 镜像 双击ubuntu-26.04-wsl-amd64.wsl 文件，会自动倒入。
+...</p></div><footer class=entry-footer><span title='2026-05-15 00:00:00 +0000 UTC'>May 15, 2026</span></footer><a class=entry-link aria-label="post link to 在Windows 11 安装WSL" href=https://yahoon.github.io/zh-cn/posts/install-wsl-on-win11/></a></article><footer class=page-footer><nav class=pagination><a class=next href=https://yahoon.github.io/zh-cn/posts/page/2/>Next&nbsp;&nbsp;»</a></nav></footer></main><footer class=footer><span>&copy; 2026 <a href=https://yahoon.github.io/zh-cn/>Yahoon 的技术博客</a></span> ·
+<span>Powered by
+<a href="https://gohugo.io/?utm_source=papermod" rel=noopener target=_blank>Hugo</a> &
+<a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top id=top-link class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey=g><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>
+</a><script>let menu=document.getElementById("menu");if(menu){const e=localStorage.getItem("menu-scroll-position");e&&(menu.scrollLeft=parseInt(e,10)),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}}document.querySelectorAll('a[href^="#"]').forEach(e=>{e.addEventListener("click",function(e){e.preventDefault();var t=this.getAttribute("href").substr(1);window.matchMedia("(prefers-reduced-motion: reduce)").matches?document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView({behavior:"smooth"}),t==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${t}`)})})</script><script>var toplink=document.getElementById("top-link");window.onscroll=function(){const e=window.innerHeight;document.body.scrollTop>e||document.documentElement.scrollTop>e?toplink.classList.remove("hidden"):toplink.classList.add("hidden")}</script><script>document.getElementById("theme-toggle").addEventListener("click",()=>{const e=document.querySelector("html");e.dataset.theme==="dark"?(e.dataset.theme="light",localStorage.setItem("pref-theme","light")):(e.dataset.theme="dark",localStorage.setItem("pref-theme","dark"))})</script></body></html>

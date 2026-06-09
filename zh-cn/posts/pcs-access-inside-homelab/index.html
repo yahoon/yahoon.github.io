@@ -1,0 +1,121 @@
+<!doctype html><html lang=zh-cn dir=auto data-theme=auto><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>Home Lab诡异的机器互访失灵 | Yahoon 的技术博客</title><meta name=keywords content><meta name=description content="介绍
+在我的Home lab里面，我有两台Linux 机器：
+
+Ubuntu 26.04 （IP: 192.168.1.4): 作为我的测试服务器，上面运行着我的PoC 环境
+Fedora 44（IP: 192.168.1.142)：作为我的工作主机
+
+一直以来，他们都工作的非常良好（我讨厌开机，登陆，和重新点开各个应用的等待时间，所以很少关机）。 每天我从我的工作机远程登录到ubuntu 服务器上做各种测试，直到这个周一。
+问题描述
+周一的早上，我继续准备从工作机ssh 到ubuntu 服务器上。 我看到之前的会话已经超时断开了，这是预想之中的，不值得大惊小怪。但是当我重新执行历史命令 ssh 192.168.1.4时， 它竟然不动了。我再次确认，ping 也不行了。
+我做了如下检查：
+
+两台机器都可以访问外网
+
+ping baidu.com 和网关 192.168.1.1 =》 OK
+访问外部网页 =》 OK
+ip route show 显示路由和出口都正确
+
+
+两台机器之间无法互通，ping和ssh都不行
+
+# ping 192.168.1.4
+PING 192.168.1.4 (192.168.1.4) 56(84) bytes of data.
+From 192.168.1.142 icmp_seq=4 Destination Host Unreachable
+ping: sendmsg: No route to host
+
+两台机器的网络连接正常
+
+ubuntu是有线连接
+fedora是无线连接
+
+
+
+排错
+防火墙
+第一反应是防火墙问题：
+
+
+我把firewall service 完全关闭，但是不起作用"><meta name=author content><link rel=canonical href=https://yahoon.github.io/zh-cn/posts/pcs-access-inside-homelab/><link crossorigin=anonymous href=/assets/css/stylesheet.657e075e7c5596b5a605862ac3ab6ef5e945dbab9737b155c0a1c1164e23c870.css integrity="sha256-ZX4HXnxVlrWmBYYqw6tu9elF26uXN7FVwKHBFk4jyHA=" rel="preload stylesheet" as=style><link rel=icon href=https://yahoon.github.io/favicon.ico><link rel=icon type=image/png sizes=16x16 href=https://yahoon.github.io/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=https://yahoon.github.io/favicon-32x32.png><link rel=apple-touch-icon href=https://yahoon.github.io/apple-touch-icon.png><link rel=mask-icon href=https://yahoon.github.io/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate hreflang=en href=https://yahoon.github.io/posts/pcs-access-inside-homelab/><link rel=alternate hreflang=zh-cn href=https://yahoon.github.io/zh-cn/posts/pcs-access-inside-homelab/><noscript><style>#theme-toggle,.top-link{display:none}</style><style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--code-block-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51);color-scheme:dark}.list{background:var(--theme)}.toc{background:var(--entry)}}</style></noscript><script>localStorage.getItem("pref-theme")==="dark"?document.querySelector("html").dataset.theme="dark":localStorage.getItem("pref-theme")==="light"?document.querySelector("html").dataset.theme="light":window.matchMedia("(prefers-color-scheme: dark)").matches?document.querySelector("html").dataset.theme="dark":document.querySelector("html").dataset.theme="light"</script><meta property="og:url" content="https://yahoon.github.io/zh-cn/posts/pcs-access-inside-homelab/"><meta property="og:site_name" content="Yahoon 的技术博客"><meta property="og:title" content="Home Lab诡异的机器互访失灵"><meta property="og:description" content="介绍 在我的Home lab里面，我有两台Linux 机器：
+Ubuntu 26.04 （IP: 192.168.1.4): 作为我的测试服务器，上面运行着我的PoC 环境 Fedora 44（IP: 192.168.1.142)：作为我的工作主机 一直以来，他们都工作的非常良好（我讨厌开机，登陆，和重新点开各个应用的等待时间，所以很少关机）。 每天我从我的工作机远程登录到ubuntu 服务器上做各种测试，直到这个周一。
+问题描述 周一的早上，我继续准备从工作机ssh 到ubuntu 服务器上。 我看到之前的会话已经超时断开了，这是预想之中的，不值得大惊小怪。但是当我重新执行历史命令 ssh 192.168.1.4时， 它竟然不动了。我再次确认，ping 也不行了。
+我做了如下检查：
+两台机器都可以访问外网 ping baidu.com 和网关 192.168.1.1 =》 OK 访问外部网页 =》 OK ip route show 显示路由和出口都正确 两台机器之间无法互通，ping和ssh都不行 # ping 192.168.1.4 PING 192.168.1.4 (192.168.1.4) 56(84) bytes of data. From 192.168.1.142 icmp_seq=4 Destination Host Unreachable ping: sendmsg: No route to host 两台机器的网络连接正常 ubuntu是有线连接 fedora是无线连接 排错 防火墙 第一反应是防火墙问题：
+我把firewall service 完全关闭，但是不起作用"><meta property="og:locale" content="zh_cn"><meta property="og:type" content="article"><meta property="article:section" content="posts"><meta property="article:published_time" content="2026-05-25T00:00:00+00:00"><meta property="article:modified_time" content="2026-05-25T00:00:00+00:00"><meta name=twitter:card content="summary"><meta name=twitter:title content="Home Lab诡异的机器互访失灵"><meta name=twitter:description content="介绍 在我的Home lab里面，我有两台Linux 机器：
+Ubuntu 26.04 （IP: 192.168.1.4): 作为我的测试服务器，上面运行着我的PoC 环境 Fedora 44（IP: 192.168.1.142)：作为我的工作主机 一直以来，他们都工作的非常良好（我讨厌开机，登陆，和重新点开各个应用的等待时间，所以很少关机）。 每天我从我的工作机远程登录到ubuntu 服务器上做各种测试，直到这个周一。
+问题描述 周一的早上，我继续准备从工作机ssh 到ubuntu 服务器上。 我看到之前的会话已经超时断开了，这是预想之中的，不值得大惊小怪。但是当我重新执行历史命令 ssh 192.168.1.4时， 它竟然不动了。我再次确认，ping 也不行了。
+我做了如下检查：
+两台机器都可以访问外网 ping baidu.com 和网关 192.168.1.1 =》 OK 访问外部网页 =》 OK ip route show 显示路由和出口都正确 两台机器之间无法互通，ping和ssh都不行 # ping 192.168.1.4 PING 192.168.1.4 (192.168.1.4) 56(84) bytes of data. From 192.168.1.142 icmp_seq=4 Destination Host Unreachable ping: sendmsg: No route to host 两台机器的网络连接正常 ubuntu是有线连接 fedora是无线连接 排错 防火墙 第一反应是防火墙问题：
+我把firewall service 完全关闭，但是不起作用"><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Posts","item":"https://yahoon.github.io/zh-cn/posts/"},{"@type":"ListItem","position":2,"name":"Home Lab诡异的机器互访失灵","item":"https://yahoon.github.io/zh-cn/posts/pcs-access-inside-homelab/"}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"Home Lab诡异的机器互访失灵","name":"Home Lab诡异的机器互访失灵","description":"介绍 在我的Home lab里面，我有两台Linux 机器：\nUbuntu 26.04 （IP: 192.168.1.4): 作为我的测试服务器，上面运行着我的PoC 环境 Fedora 44（IP: 192.168.1.142)：作为我的工作主机 一直以来，他们都工作的非常良好（我讨厌开机，登陆，和重新点开各个应用的等待时间，所以很少关机）。 每天我从我的工作机远程登录到ubuntu 服务器上做各种测试，直到这个周一。\n问题描述 周一的早上，我继续准备从工作机ssh 到ubuntu 服务器上。 我看到之前的会话已经超时断开了，这是预想之中的，不值得大惊小怪。但是当我重新执行历史命令 ssh 192.168.1.4时， 它竟然不动了。我再次确认，ping 也不行了。\n我做了如下检查：\n两台机器都可以访问外网 ping baidu.com 和网关 192.168.1.1 =》 OK 访问外部网页 =》 OK ip route show 显示路由和出口都正确 两台机器之间无法互通，ping和ssh都不行 # ping 192.168.1.4 PING 192.168.1.4 (192.168.1.4) 56(84) bytes of data. From 192.168.1.142 icmp_seq=4 Destination Host Unreachable ping: sendmsg: No route to host 两台机器的网络连接正常 ubuntu是有线连接 fedora是无线连接 排错 防火墙 第一反应是防火墙问题：\n我把firewall service 完全关闭，但是不起作用\n","keywords":[],"articleBody":"介绍 在我的Home lab里面，我有两台Linux 机器：\nUbuntu 26.04 （IP: 192.168.1.4): 作为我的测试服务器，上面运行着我的PoC 环境 Fedora 44（IP: 192.168.1.142)：作为我的工作主机 一直以来，他们都工作的非常良好（我讨厌开机，登陆，和重新点开各个应用的等待时间，所以很少关机）。 每天我从我的工作机远程登录到ubuntu 服务器上做各种测试，直到这个周一。\n问题描述 周一的早上，我继续准备从工作机ssh 到ubuntu 服务器上。 我看到之前的会话已经超时断开了，这是预想之中的，不值得大惊小怪。但是当我重新执行历史命令 ssh 192.168.1.4时， 它竟然不动了。我再次确认，ping 也不行了。\n我做了如下检查：\n两台机器都可以访问外网 ping baidu.com 和网关 192.168.1.1 =》 OK 访问外部网页 =》 OK ip route show 显示路由和出口都正确 两台机器之间无法互通，ping和ssh都不行 # ping 192.168.1.4 PING 192.168.1.4 (192.168.1.4) 56(84) bytes of data. From 192.168.1.142 icmp_seq=4 Destination Host Unreachable ping: sendmsg: No route to host 两台机器的网络连接正常 ubuntu是有线连接 fedora是无线连接 排错 防火墙 第一反应是防火墙问题：\n我把firewall service 完全关闭，但是不起作用\n我想到之前出现过nftables 自定义 rule的问题\n# sudo nft list ruleset table inet mihomo { ... } 使用 sudo nft flush table inet mihomo 清理，但是仍然无效\nARP表 在我的工作机上，我看到arp表有问题\n❯ arp -a ? (192.168.1.18) at cc:2d:21:77:42:45 [ether] on wlp9s0 ? (192.168.1.4) at on wlp9s0 这说明我根本没有得到对方的ARP应答。网络在二层不通，后续的 ping 就完全没法进行。\n检查是否有 arptables 规则在拦截\narptables 是专门用来过滤 ARP 包的，优先级更高。 查看：\n# arptables -L Chain INPUT (policy ACCEPT) Chain OUTPUT (policy ACCEPT) 检查反向路径过滤 (Reverse Path Filter)\nAI说这个是网络参数陷阱。如果严格模式开启，系统会严格检查收到的数据包，看它是否来自最佳的入站网卡。Wi-Fi 漫游或多网卡环境下，这个检查可能出错，导致 ARP 应答包被系统丢弃。\n查看并临时关闭它：\n# sysctl -a | grep rp_filter net.ipv4.conf.all.arp_filter = 0 net.ipv4.conf.all.rp_filter = 0 net.ipv4.conf.default.arp_filter = 0 net.ipv4.conf.default.rp_filter = 2 net.ipv4.conf.eth0.arp_filter = 0 net.ipv4.conf.eth0.rp_filter = 2 net.ipv4.conf.lo.arp_filter = 0 net.ipv4.conf.lo.rp_filter = 2 net.ipv4.conf.wlp9s0.arp_filter = 0 net.ipv4.conf.wlp9s0.rp_filter = 2 # 为无线网卡 wlp9s0 关闭这个过滤 sudo sysctl -w net.ipv4.conf.wlp9s0.rp_filter=0 # 同时关闭全局的 sudo sysctl -w net.ipv4.conf.all.rp_filter=0 刷新 ARP 缓存并测试\n设置完后，先清掉 ARP 表里的坏条目，然后立刻重新测试：\n# 删掉状态不对的条目 sudo arp -d 192.168.1.4 # 重新 ping 对方 ping 192.168.1.4 还是不行\ntcpdump # sudo tcpdump -i wlp9s0 arp and host 192.168.1.4 dropped privs to tcpdump tcpdump: verbose output suppressed, use -v[v]... for full protocol decode listening on wlp9s0, link-type EN10MB (Ethernet), snapshot length 262144 bytes 21:42:13.359805 ARP, Request who-has 192.168.1.4 tell yahoon-laptop, length 28 21:42:14.394320 ARP, Request who-has 192.168.1.4 tell yahoon-laptop, length 28 21:42:15.418208 ARP, Request who-has 192.168.1.4 tell yahoon-laptop, length 28 21:42:29.625986 ARP, Request who-has -yahoon-laptop tell 192.168.1.4, length 46 21:42:29.626034 ARP, Reply -yahoon-laptop is-at 5e:15:1c:ce:4d:78 (oui Unknown), length 28 网络层面的通信没有任何问题，机器确实收到了 192.168.1.4 发来的 ARP 请求，并且机器也成功发出了 ARP 应答（倒数第二行就是机器在告诉对方“我在这里”）。\n但诡异的是，是本机在主动询问对方，而对方其实也在问fedora，双方没有形成正确的“一问一答”配对，导致 ARP 表无法建立。这是一个非常典型的 arp_filter 或 rp_filter 机制在内核层面将 ARP 表项更新逻辑“卡死” 的现象。\n静态锁定 ARP 表项（最快验证）\n完全绕过动态 ARP 学习，手动把对方的 MAC 地址写死：\n# 从之前的 tcpdump 中，看到对方的 MAC 地址是合法的 # 可以再次确认，或者直接执行下面的添加命令 sudo arp -s 192.168.1.4 \u003c对方MAC地址\u003e ping 192.168.1.4 最后的硬件可能性 最后我想到无线网卡，有没有是它的问题。\n# ethtool -S wlp9s0 NIC statistics: rx_packets: 1074 rx_bytes: 312817 rx_duplicates: 0 rx_fragments: 358 rx_dropped: 43 tx_packets: 748 tx_bytes: 396353 tx_filtered: 0 tx_retry_failed: 0 tx_retries: 75 tx_handlers_drop: 0 这个统计信息非常关键，它把问题从“软件配置”彻底转向了“物理链路质量”。\n🎯 真正元凶：无线链路质量太差，回包重传耗尽 tx_retries: 75 这个数字说明无线网卡在发送数据包时，有 75 次因为没有收到对方的 ACK 确认而进行了重传。对于总共才 748 个发包来说，这个失败率太高了。\n这直接解释了为什么会出现 ARP 卡死：当机器试图用单播回应 ARP 请求时，这个数据包因为信号问题发出去后对方收不到，或者对方的 ACK 网卡收不到，导致 ARP 握手在物理层就失败了，最终被上层判定为“目标不可达”。\n修复： 关闭 Wi-Fi 节电模式\n节电模式会在网络空闲时降低功率，加剧丢包。请立即执行：\n# 查看无线网卡名称（比如 wlp9s0） iw dev sudo iw dev wlp9s0 set power_save off ping 192.168.1.4 最后我通过fedora 桌面做了：\n关闭节电模式 反思 我为了节电， 将电源模式改成了Power-Saver , 这样在机器空闲时，网卡进入了一种非正常的状态\n","wordCount":"410","inLanguage":"zh-cn","datePublished":"2026-05-25T00:00:00Z","dateModified":"2026-05-25T00:00:00Z","mainEntityOfPage":{"@type":"WebPage","@id":"https://yahoon.github.io/zh-cn/posts/pcs-access-inside-homelab/"},"publisher":{"@type":"Organization","name":"Yahoon 的技术博客","logo":{"@type":"ImageObject","url":"https://yahoon.github.io/favicon.ico"}}}</script></head><body id=top><header class=header><nav class=header-nav><div class=logo><a href=https://yahoon.github.io/zh-cn/ accesskey=h title="Yahoon 的技术博客 (Alt + H)">Yahoon 的技术博客</a><div class=logo-switches><button id=theme-toggle class=theme-toggle accesskey=t title="(Alt + T)" aria-label="Toggle theme">
+<svg class="moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+<svg class="sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+</button><span class=nav-sep>|</span><ul class=lang-menu><li><a href=https://yahoon.github.io/ title=English aria-label=English>English</a></li></ul></div></div><ul id=menu class=menu><li><a href=https://yahoon.github.io/zh-cn/posts/about-me/ title=关于我><span>关于我</span></a></li></ul></nav></header><main class=main><article class=post-single><header class=post-header><h1 class="post-title entry-hint-parent">Home Lab诡异的机器互访失灵</h1><div class=post-meta><span title='2026-05-25 00:00:00 +0000 UTC'>May 25, 2026</span>&nbsp;|&nbsp;<span>Translations:</span><ul class=i18n_list><li><a href=https://yahoon.github.io/posts/pcs-access-inside-homelab/>English</a></li></ul></div></header><details class=toc open><summary accesskey=c title="(Alt + C)"><span class=title>Table of Contents</span></summary><div class=inner><ul><li><a href=#%e4%bb%8b%e7%bb%8d aria-label=介绍>介绍</a></li><li><a href=#%e9%97%ae%e9%a2%98%e6%8f%8f%e8%bf%b0 aria-label=问题描述>问题描述</a></li><li><a href=#%e6%8e%92%e9%94%99 aria-label=排错>排错</a><ul><li><a href=#%e9%98%b2%e7%81%ab%e5%a2%99 aria-label=防火墙>防火墙</a></li><li><a href=#arp%e8%a1%a8 aria-label=ARP表>ARP表</a></li><li><a href=#tcpdump aria-label=tcpdump>tcpdump</a></li><li><a href=#%e6%9c%80%e5%90%8e%e7%9a%84%e7%a1%ac%e4%bb%b6%e5%8f%af%e8%83%bd%e6%80%a7 aria-label=最后的硬件可能性>最后的硬件可能性</a></li><li><a href=#-%e7%9c%9f%e6%ad%a3%e5%85%83%e5%87%b6%e6%97%a0%e7%ba%bf%e9%93%be%e8%b7%af%e8%b4%a8%e9%87%8f%e5%a4%aa%e5%b7%ae%e5%9b%9e%e5%8c%85%e9%87%8d%e4%bc%a0%e8%80%97%e5%b0%bd aria-label="🎯 真正元凶：无线链路质量太差，回包重传耗尽">🎯 真正元凶：无线链路质量太差，回包重传耗尽</a></li><li><a href=#%e4%bf%ae%e5%a4%8d aria-label=修复：>修复：</a></li></ul></li><li><a href=#%e5%8f%8d%e6%80%9d aria-label=反思>反思</a></li></ul></div></details><div class="post-content md-content"><h2 id=介绍>介绍<a hidden class=anchor aria-hidden=true href=#介绍>#</a></h2><p>在我的Home lab里面，我有两台Linux 机器：</p><ul><li>Ubuntu 26.04 （IP: 192.168.1.4): 作为我的测试服务器，上面运行着我的PoC 环境</li><li>Fedora 44（IP: 192.168.1.142)：作为我的工作主机</li></ul><p>一直以来，他们都工作的非常良好（我讨厌开机，登陆，和重新点开各个应用的等待时间，所以很少关机）。 每天我从我的工作机远程登录到ubuntu 服务器上做各种测试，直到这个周一。</p><h2 id=问题描述>问题描述<a hidden class=anchor aria-hidden=true href=#问题描述>#</a></h2><p>周一的早上，我继续准备从工作机ssh 到ubuntu 服务器上。 我看到之前的会话已经超时断开了，这是预想之中的，不值得大惊小怪。但是当我重新执行历史命令 <code>ssh 192.168.1.4</code>时， 它竟然不动了。我再次确认，ping 也不行了。</p><p>我做了如下检查：</p><ol><li>两台机器都可以访问外网<ol><li>ping baidu.com 和网关 192.168.1.1 =》 OK</li><li>访问外部网页 =》 OK</li><li>ip route show 显示路由和出口都正确</li></ol></li><li>两台机器之间无法互通，ping和ssh都不行</li></ol><pre tabindex=0><code># ping 192.168.1.4
+PING 192.168.1.4 (192.168.1.4) 56(84) bytes of data.
+From 192.168.1.142 icmp_seq=4 Destination Host Unreachable
+ping: sendmsg: No route to host
+</code></pre><ol start=3><li>两台机器的网络连接正常<ol><li>ubuntu是有线连接</li><li>fedora是无线连接</li></ol></li></ol><h2 id=排错>排错<a hidden class=anchor aria-hidden=true href=#排错>#</a></h2><h3 id=防火墙><strong>防火墙</strong><a hidden class=anchor aria-hidden=true href=#防火墙>#</a></h3><p>第一反应是防火墙问题：</p><ol><li><p>我把firewall service 完全关闭，但是不起作用</p></li><li><p>我想到之前出现过nftables 自定义 rule的问题</p></li></ol><pre tabindex=0><code># sudo nft list ruleset
+table inet mihomo {
+	...
+}
+</code></pre><p>使用 <code>sudo nft flush table inet mihomo</code> 清理，但是仍然无效</p><h3 id=arp表><strong>ARP表</strong><a hidden class=anchor aria-hidden=true href=#arp表>#</a></h3><p>在我的工作机上，我看到arp表有问题</p><pre tabindex=0><code>❯ arp -a
+? (192.168.1.18) at cc:2d:21:77:42:45 [ether] on wlp9s0
+? (192.168.1.4) at &lt;incomplete&gt; on wlp9s0
+</code></pre><p>这说明我根本没有得到对方的ARP应答。网络在二层不通，后续的 <code>ping</code> 就完全没法进行。</p><p><strong>检查是否有 <code>arptables</code> 规则在拦截</strong><br><code>arptables</code> 是专门用来过滤 ARP 包的，优先级更高。 查看：</p><pre tabindex=0><code># arptables -L
+Chain INPUT (policy ACCEPT)
+
+Chain OUTPUT (policy ACCEPT)
+</code></pre><p><strong>检查反向路径过滤 (Reverse Path Filter)</strong></p><p>AI说这个是网络参数陷阱。如果严格模式开启，系统会严格检查收到的数据包，看它是否来自最佳的入站网卡。Wi-Fi 漫游或多网卡环境下，这个检查可能出错，导致 ARP 应答包被系统丢弃。</p><p>查看并临时关闭它：</p><pre tabindex=0><code># sysctl  -a | grep rp_filter
+net.ipv4.conf.all.arp_filter = 0
+net.ipv4.conf.all.rp_filter = 0
+net.ipv4.conf.default.arp_filter = 0
+net.ipv4.conf.default.rp_filter = 2
+net.ipv4.conf.eth0.arp_filter = 0
+net.ipv4.conf.eth0.rp_filter = 2
+net.ipv4.conf.lo.arp_filter = 0
+net.ipv4.conf.lo.rp_filter = 2
+net.ipv4.conf.wlp9s0.arp_filter = 0
+net.ipv4.conf.wlp9s0.rp_filter = 2
+
+# 为无线网卡 wlp9s0 关闭这个过滤
+sudo sysctl -w net.ipv4.conf.wlp9s0.rp_filter=0
+# 同时关闭全局的
+sudo sysctl -w net.ipv4.conf.all.rp_filter=0
+</code></pre><p><strong>刷新 ARP 缓存并测试</strong></p><p>设置完后，先清掉 ARP 表里的坏条目，然后立刻重新测试：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 删掉状态不对的条目</span>
+</span></span><span style=display:flex><span>sudo arp -d 192.168.1.4
+</span></span><span style=display:flex><span><span style=color:#75715e># 重新 ping 对方</span>
+</span></span><span style=display:flex><span>ping 192.168.1.4
+</span></span></code></pre></div><p>还是不行</p><h3 id=tcpdump>tcpdump<a hidden class=anchor aria-hidden=true href=#tcpdump>#</a></h3><pre tabindex=0><code># sudo tcpdump -i wlp9s0 arp and host 192.168.1.4
+dropped privs to tcpdump
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on wlp9s0, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+21:42:13.359805 ARP, Request who-has 192.168.1.4 tell yahoon-laptop, length 28
+21:42:14.394320 ARP, Request who-has 192.168.1.4 tell yahoon-laptop, length 28
+21:42:15.418208 ARP, Request who-has 192.168.1.4 tell yahoon-laptop, length 28
+21:42:29.625986 ARP, Request who-has -yahoon-laptop tell 192.168.1.4, length 46
+21:42:29.626034 ARP, Reply -yahoon-laptop is-at 5e:15:1c:ce:4d:78 (oui Unknown), length 28
+</code></pre><p>网络层面的通信没有任何问题，<strong>机器确实收到了 <code>192.168.1.4</code> 发来的 ARP 请求，并且机器也成功发出了 ARP 应答</strong>（倒数第二行就是机器在告诉对方“我在这里”）。</p><p>但诡异的是，<strong>是本机在主动询问对方，而对方其实也在问fedora</strong>，双方没有形成正确的“一问一答”配对，导致 ARP 表无法建立。这是一个非常典型的 <strong><code>arp_filter</code> 或 <code>rp_filter</code> 机制在内核层面将 ARP 表项更新逻辑“卡死”</strong> 的现象。</p><p><strong>静态锁定 ARP 表项（最快验证）</strong></p><p>完全绕过动态 ARP 学习，手动把对方的 MAC 地址写死：</p><pre tabindex=0><code># 从之前的 tcpdump 中，看到对方的 MAC 地址是合法的
+# 可以再次确认，或者直接执行下面的添加命令
+sudo arp -s 192.168.1.4 &lt;对方MAC地址&gt;
+ping 192.168.1.4
+</code></pre><h3 id=最后的硬件可能性>最后的硬件可能性<a hidden class=anchor aria-hidden=true href=#最后的硬件可能性>#</a></h3><p>最后我想到无线网卡，有没有是它的问题。</p><pre tabindex=0><code># ethtool -S wlp9s0
+NIC statistics:
+     rx_packets: 1074
+     rx_bytes: 312817
+     rx_duplicates: 0
+     rx_fragments: 358
+     rx_dropped: 43
+     tx_packets: 748
+     tx_bytes: 396353
+     tx_filtered: 0
+     tx_retry_failed: 0
+     tx_retries: 75
+     tx_handlers_drop: 0
+</code></pre><p>这个统计信息非常关键，它把问题从“软件配置”彻底转向了“物理链路质量”。</p><h3 id=-真正元凶无线链路质量太差回包重传耗尽>🎯 真正元凶：无线链路质量太差，回包重传耗尽<a hidden class=anchor aria-hidden=true href=#-真正元凶无线链路质量太差回包重传耗尽>#</a></h3><p><code>tx_retries: 75</code> 这个数字说明无线网卡在发送数据包时，有 75 次因为没有收到对方的 ACK 确认而进行了重传。对于总共才 748 个发包来说，这个失败率太高了。</p><p>这直接解释了为什么会出现 ARP 卡死：当机器试图用单播回应 ARP 请求时，这个数据包因为信号问题发出去后对方收不到，或者对方的 ACK 网卡收不到，导致 ARP 握手在物理层就失败了，最终被上层判定为“目标不可达”。</p><h3 id=修复>修复：<a hidden class=anchor aria-hidden=true href=#修复>#</a></h3><p><strong>关闭 Wi-Fi 节电模式</strong><br>节电模式会在网络空闲时降低功率，加剧丢包。请立即执行：</p><pre tabindex=0><code># 查看无线网卡名称（比如 wlp9s0）
+iw dev
+
+sudo iw dev wlp9s0 set power_save off
+ping 192.168.1.4
+</code></pre><p>最后我通过fedora 桌面做了：</p><ul><li>关闭节电模式</li></ul><h2 id=反思>反思<a hidden class=anchor aria-hidden=true href=#反思>#</a></h2><p>我为了节电， 将电源模式改成了<code>Power-Saver</code> , 这样在机器空闲时，网卡进入了一种非正常的状态</p></div><footer class=post-footer><ul class=post-tags></ul></footer><div class=comments><p style=font-size:1.15rem;font-weight:600;margin-bottom:18px;color:var(--content)>💬 欢迎留下你的评论（需要 GitHub 账号）</p><script src=https://giscus.app/client.js data-repo=yahoon/yahoon.github.io data-repo-id=R_kgDOSd8Mkg data-category=General data-category-id=DIC_kwDOSd8Mks4C9TS4 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=bottom data-theme=preferred_color_scheme data-lang=en crossorigin=anonymous async></script></div></article></main><footer class=footer><span>&copy; 2026 <a href=https://yahoon.github.io/zh-cn/>Yahoon 的技术博客</a></span> ·
+<span>Powered by
+<a href="https://gohugo.io/?utm_source=papermod" rel=noopener target=_blank>Hugo</a> &
+<a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top id=top-link class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey=g><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>
+</a><script>let menu=document.getElementById("menu");if(menu){const e=localStorage.getItem("menu-scroll-position");e&&(menu.scrollLeft=parseInt(e,10)),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}}document.querySelectorAll('a[href^="#"]').forEach(e=>{e.addEventListener("click",function(e){e.preventDefault();var t=this.getAttribute("href").substr(1);window.matchMedia("(prefers-reduced-motion: reduce)").matches?document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView({behavior:"smooth"}),t==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${t}`)})})</script><script>var toplink=document.getElementById("top-link");window.onscroll=function(){const e=window.innerHeight;document.body.scrollTop>e||document.documentElement.scrollTop>e?toplink.classList.remove("hidden"):toplink.classList.add("hidden")}</script><script>document.getElementById("theme-toggle").addEventListener("click",()=>{const e=document.querySelector("html");e.dataset.theme==="dark"?(e.dataset.theme="light",localStorage.setItem("pref-theme","light")):(e.dataset.theme="dark",localStorage.setItem("pref-theme","dark"))})</script></body></html>
