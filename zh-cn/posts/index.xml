@@ -1,0 +1,549 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Posts on Yahoon 的技术博客</title><link>https://yahoon.github.io/zh-cn/posts/</link><description>Recent content in Posts on Yahoon 的技术博客</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Tue, 07 Jul 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://yahoon.github.io/zh-cn/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>通过命令行使用公网SMTP服务器发邮件</title><link>https://yahoon.github.io/zh-cn/posts/send-mail-from-cli/</link><pubDate>Tue, 07 Jul 2026 00:00:00 +0000</pubDate><guid>https://yahoon.github.io/zh-cn/posts/send-mail-from-cli/</guid><description>&lt;h2 id="通过命令行使用公网smtp服务器发邮件"&gt;通过命令行使用公网SMTP服务器发邮件&lt;/h2&gt;
+&lt;p&gt;我需要配置一个报警功能，需要从本机( Fedora 44)的命令行去往公网的邮箱发送email.&lt;/p&gt;
+&lt;p&gt;在本机装posftix并不是一个好的选择，因为公网的邮件服务都会为了预防垃圾邮件而做严格检查。&lt;/p&gt;
+&lt;p&gt;计划： 我有126.com的邮箱，所以用126.com的SMTP服务器&lt;/p&gt;
+&lt;h3 id="步骤一获取你的-126com-授权码"&gt;步骤一：获取你的 126.com 授权码&lt;/h3&gt;
+&lt;p&gt;出于安全原因，&lt;code&gt;126.com&lt;/code&gt; &lt;strong&gt;不会&lt;/strong&gt;允许你在终端中使用常规登录密码，你需要一个应用专用密码。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;登录你的 &lt;code&gt;126.com&lt;/code&gt; 网页邮箱。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;进入 &lt;strong&gt;设置&lt;/strong&gt; -&amp;gt; &lt;strong&gt;POP3/SMTP/IMAP&lt;/strong&gt;。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;开启 &lt;strong&gt;POP3/SMTP服务&lt;/strong&gt; 开关。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;按照提示生成一个&lt;strong&gt;授权码&lt;/strong&gt;。复制此代码，你将用它作为密码。
+&lt;img alt="1.jpg" loading="lazy" src="https://yahoon.github.io/pics/2026.07.07-send-mail-from-cli/1.png"&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id="步骤二在-fedora-44-上安装-msmtp-和-mailx"&gt;步骤二：在 Fedora 44 上安装 &lt;code&gt;msmtp&lt;/code&gt; 和 &lt;code&gt;mailx&lt;/code&gt;&lt;/h3&gt;
+&lt;p&gt;打开终端，安装 &lt;code&gt;msmtp&lt;/code&gt;（SMTP 客户端）和 &lt;code&gt;s-nail&lt;/code&gt;（现代 &lt;code&gt;mailx&lt;/code&gt; 用户界面，用于发送邮件正文）：&lt;/p&gt;
+&lt;pre tabindex="0"&gt;&lt;code&gt;sudo dnf install msmtp s-nail
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id="步骤三配置-msmtp"&gt;步骤三：配置 &lt;code&gt;msmtp&lt;/code&gt;&lt;/h3&gt;
+&lt;p&gt;在你的用户目录下创建配置文件：&lt;/p&gt;
+&lt;pre tabindex="0"&gt;&lt;code&gt;mkdir -p ~/.config/msmtp
+vi ~/.config/msmtp/config
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;粘贴以下配置，将占位符替换为你实际的 126 邮箱和步骤一中复制的授权码：&lt;/p&gt;
+&lt;pre tabindex="0"&gt;&lt;code&gt;# Set default values for all further accounts.
+defaults
+auth on
+tls on
+tls_starttls off
+tls_certcheck on
+tls_trust_file /etc/ssl/certs/ca-certificates.crt
+logfile ~/.config/msmtp/msmtp.log
+# 126.com Account
+account my_account
+host smtp.126.com
+port 465
+from abc@126.com
+user abc@126.com
+password &amp;lt;the authorization code&amp;gt;
+# Set a default account
+account default : my_account
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;将其文件权限设置为 &lt;code&gt;0600&lt;/code&gt;&lt;/p&gt;</description></item><item><title>AWS IAM管理要点 Role vs Policy</title><link>https://yahoon.github.io/zh-cn/posts/role-vs-policy-in-aws-iam/</link><pubDate>Fri, 03 Jul 2026 00:00:00 +0000</pubDate><guid>https://yahoon.github.io/zh-cn/posts/role-vs-policy-in-aws-iam/</guid><description>&lt;p&gt;在AWS的用户和权限管理都是通过IAM来完成。 IAM中比较复杂的两个概念就是Role 和Policy。本文将我所学习和理解的做一个总结。&lt;/p&gt;
+&lt;h1 id="aws-iam管理要点-role-vs-policy"&gt;AWS IAM管理要点: Role vs Policy&lt;/h1&gt;
+&lt;h2 id="role-是什么"&gt;Role 是什么&lt;/h2&gt;
+&lt;p&gt;Role 本身只是一个空壳子，它内部包含两部分配置：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;信任策略（Trust Policy）：&lt;/strong&gt; 决定&lt;strong&gt;谁&lt;/strong&gt;有资格戴上这顶帽子（可以是一台 EC2 服务器，可以是一个 Lambda 函数，也可以是另一个 AWS 账号里的用户）。 这个里面要写principal （谁）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;权限策略（Permission Policy）：&lt;/strong&gt; 决定戴上这顶帽子后&lt;strong&gt;能干什么&lt;/strong&gt;（这就是把上面介绍的 &lt;strong&gt;Policy&lt;/strong&gt; 绑定过来）。 这个里面写做什么&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="policy是什么"&gt;Policy是什么&lt;/h2&gt;
+&lt;p&gt;policy就是一个json文件，定义deny 和allow 的动作&lt;/p&gt;
+&lt;p&gt;IAM 里面提policy默认是指的&lt;strong&gt;permission policy&lt;/strong&gt;&lt;/p&gt;
+&lt;h3 id="policy的主元素"&gt;Policy的主元素：&lt;/h3&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Element&lt;/th&gt;
+&lt;th&gt;Description&lt;/th&gt;
+&lt;th&gt;Required&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;Effect&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;使用 Allow 或 Deny 表示策略允许或拒绝访问。&lt;/td&gt;
+&lt;td&gt;Yes&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;Principal&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;指定要允许或拒绝访问的账户、用户、角色或联合用户（仅用于基于资源的策略）。&lt;/td&gt;
+&lt;td&gt;No&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;Action&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;包含策略允许或拒绝的操作列表。&lt;/td&gt;
+&lt;td&gt;Yes&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;Resource&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;指定操作所应用的资源列表。&lt;/td&gt;
+&lt;td&gt;No&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;Condition&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;指定策略授予权限的条件。&lt;/td&gt;
+&lt;td&gt;No&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id="permission-policy"&gt;Permission Policy&lt;/h3&gt;
+&lt;p&gt;最基础和通用的的policy&lt;/p&gt;
+&lt;p&gt;permission policy 是用来定义权限的&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;不带principal字段&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;带action 和resource&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;例子：&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-Go" data-lang="Go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#e6db74"&gt;&amp;#34;Version&amp;#34;&lt;/span&gt;: &lt;span style="color:#e6db74"&gt;&amp;#34;2012-10-17&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#e6db74"&gt;&amp;#34;Statement&amp;#34;&lt;/span&gt;: [
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#e6db74"&gt;&amp;#34;Effect&amp;#34;&lt;/span&gt;: &lt;span style="color:#e6db74"&gt;&amp;#34;Allow&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#e6db74"&gt;&amp;#34;Action&amp;#34;&lt;/span&gt;: [
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#e6db74"&gt;&amp;#34;s3:GetObject&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#e6db74"&gt;&amp;#34;s3:PutObject&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; ],
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#e6db74"&gt;&amp;#34;Resource&amp;#34;&lt;/span&gt;: &lt;span style="color:#e6db74"&gt;&amp;#34;arn:aws:s3:::我的图片存储桶/*&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; ]
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="trust-policy-role用来定义我代表谁-或者说谁可以扮演这个role"&gt;Trust policy： role用来定义我代表谁 （或者说谁可以扮演这个role）&lt;/h3&gt;
+&lt;p&gt;它是用来 定义principal的（&lt;strong&gt;也就是谁&lt;/strong&gt;， 可以是user, service,或者另外一个role）&lt;/p&gt;</description></item><item><title>ArgoCD从内网的GitLab Repo部署应用</title><link>https://yahoon.github.io/zh-cn/posts/deploy-argo-app-from-local-gitlab/</link><pubDate>Mon, 15 Jun 2026 00:00:00 +0000</pubDate><guid>https://yahoon.github.io/zh-cn/posts/deploy-argo-app-from-local-gitlab/</guid><description>&lt;h1 id="argocd从内网的gitlab-repo部署应用"&gt;ArgoCD从内网的GitLab Repo部署应用&lt;/h1&gt;
+&lt;p&gt;本文将讲解中我的home lab（一个访问受限的环境中），使用ArgoCD 部署一个gitlab repo的全部过程&lt;/p&gt;
+&lt;h2 id="home-lab-env"&gt;Home lab Env&lt;/h2&gt;
+&lt;p&gt;在home lab中， 有如下服务运行着&lt;/p&gt;
+&lt;h3 id="gitlab-server"&gt;GitLab server:&lt;/h3&gt;
+&lt;p&gt;http://192.168.1.4:8080/&lt;/p&gt;
+&lt;h3 id="k8s-cluster"&gt;K8s Cluster&lt;/h3&gt;
+&lt;p&gt;我有一个3节点的k8s集群： 一个maste，2个node&lt;/p&gt;
+&lt;pre tabindex="0"&gt;&lt;code&gt;❯ kubectl cluster-info
+Kubernetes control plane is running at https://192.168.1.101:6443
+CoreDNS is running at https://192.168.1.101:6443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+To further debug and diagnose cluster problems, use &amp;#39;kubectl cluster-info dump&amp;#39;.
+❯ kubectl get no
+NAME STATUS ROLES AGE VERSION
+k8s-master Ready control-plane 25d v1.36.0
+k8s-worker1 Ready &amp;lt;none&amp;gt; 25d v1.36.0
+k8s-worker2 Ready &amp;lt;none&amp;gt; 25d v1.36.0
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id="argocd"&gt;ArgoCD&lt;/h3&gt;
+&lt;p&gt;ArgoCD 已经部署到K8S集群里面了&lt;/p&gt;</description></item><item><title>以tgz包的形式来安装Helm Chart</title><link>https://yahoon.github.io/zh-cn/posts/install-helm-chart-from-tgz/</link><pubDate>Tue, 09 Jun 2026 00:00:00 +0000</pubDate><guid>https://yahoon.github.io/zh-cn/posts/install-helm-chart-from-tgz/</guid><description>&lt;p&gt;&lt;code&gt;&amp;gt; 「本文同步首发于个人博客 yahoon.github.io，原创内容，转载请注明出处」&lt;/code&gt;&lt;/p&gt;
+&lt;h2 id="helm-chart的离线安装targz文件"&gt;Helm Chart的离线安装（tar.gz文件）&lt;/h2&gt;
+&lt;p&gt;最近在学习helm, 作为运维，以前对这个K8s的应用部署接触的不多， 这几天正好实践操作一下。&lt;/p&gt;
+&lt;p&gt;使用官方给的&lt;strong&gt;podinfo&lt;/strong&gt; 这个chart， 具体步骤如下:&lt;/p&gt;
+&lt;h4 id="step-1-拉取chart"&gt;Step 1: 拉取Chart&lt;/h4&gt;
+&lt;p&gt;chart 包本身就是一个tar.gz 的包&lt;/p&gt;
+&lt;p&gt;首先说明 chart 包的发布有两个渠道&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;HTTP repo （比如artifact hub）&lt;/li&gt;
+&lt;li&gt;OCI地址（&lt;code&gt;oci://ghcr.io/...&lt;/code&gt;，也就是类似于docker hub）是Chart作者额外发布到OCI registry的
+具体发布到哪里，要看作者的意愿&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;学习 &lt;code&gt;helm pull&lt;/code&gt; 命令&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-Go" data-lang="Go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#960050;background-color:#1e0010"&gt;❯&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;helm&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;pull&lt;/span&gt; &lt;span style="color:#f92672"&gt;--&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;help&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#a6e22e"&gt;Retrieve&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;a&lt;/span&gt; &lt;span style="color:#f92672"&gt;package&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;from&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;a&lt;/span&gt; &lt;span style="color:#f92672"&gt;package&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;repository&lt;/span&gt;, &lt;span style="color:#a6e22e"&gt;and&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;download&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;it&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;locally&lt;/span&gt;.
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#a6e22e"&gt;Usage&lt;/span&gt;: &lt;span style="color:#a6e22e"&gt;helm&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;pull&lt;/span&gt; [&lt;span style="color:#a6e22e"&gt;chart&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;URL&lt;/span&gt; | &lt;span style="color:#a6e22e"&gt;repo&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;chartname&lt;/span&gt;] [&lt;span style="color:#f92672"&gt;...&lt;/span&gt;] [&lt;span style="color:#a6e22e"&gt;flags&lt;/span&gt;]
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;拉取chart 到本地也可以有两种方式 (具体看chart 在哪里):&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;OCI registry拉取&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;这个oci// 地址一般由作者提供&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-Go" data-lang="Go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#a6e22e"&gt;helm&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;pull&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;oci&lt;/span&gt;:&lt;span style="color:#75715e"&gt;//ghcr.io/stefanprodan/charts/podinfo --version 6.11.2&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ol start="2"&gt;
+&lt;li&gt;&lt;strong&gt;HTTP repo拉取&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;首先获得 chart的名字和repo&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-Go" data-lang="Go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#960050;background-color:#1e0010"&gt;❯&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;helm&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;search&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;hub&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;podinfo&lt;/span&gt; &lt;span style="color:#f92672"&gt;--&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;list&lt;/span&gt;&lt;span style="color:#f92672"&gt;-&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;repo&lt;/span&gt;&lt;span style="color:#f92672"&gt;-&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;url&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#a6e22e"&gt;URL&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;CHART&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;VERSION&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;APP&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;VERSION&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;DESCRIPTION&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;REPO&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;URL&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;https&lt;/span&gt;:&lt;span style="color:#75715e"&gt;//artifacthub.io/packages/helm/podinfo/po... 6.13.0 6.13.0 Podinfo Helm chart for Kubernetes https://stefanprodan.github.io/podinfo&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#a6e22e"&gt;https&lt;/span&gt;:&lt;span style="color:#75715e"&gt;//artifacthub.io/packages/helm/flagger/po... 6.1.4 6.1.3 Flagger canary deployment demo application https://flagger.app &lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#75715e"&gt;// 第一个URL是这个的网页（太长被截断了）, 后面是REPO URL&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#75715e"&gt;// 问题： 这里看不到chart 名字&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#75715e"&gt;// 所以要查看完整信息&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#960050;background-color:#1e0010"&gt;❯&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;helm&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;search&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;hub&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;podinfo&lt;/span&gt; &lt;span style="color:#f92672"&gt;--&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;list&lt;/span&gt;&lt;span style="color:#f92672"&gt;-&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;repo&lt;/span&gt;&lt;span style="color:#f92672"&gt;-&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;url&lt;/span&gt; &lt;span style="color:#f92672"&gt;-&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;o&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;yaml&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#f92672"&gt;-&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;app_version&lt;/span&gt;: &lt;span style="color:#ae81ff"&gt;6.13.0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#a6e22e"&gt;description&lt;/span&gt;: &lt;span style="color:#a6e22e"&gt;Podinfo&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;Helm&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;chart&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;for&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;Kubernetes&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#a6e22e"&gt;repository&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#a6e22e"&gt;name&lt;/span&gt;: &lt;span style="color:#a6e22e"&gt;podinfo&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#a6e22e"&gt;url&lt;/span&gt;: &lt;span style="color:#a6e22e"&gt;https&lt;/span&gt;:&lt;span style="color:#75715e"&gt;//stefanprodan.github.io/podinfo // 这个是repo URL&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#a6e22e"&gt;url&lt;/span&gt;: &lt;span style="color:#a6e22e"&gt;https&lt;/span&gt;:&lt;span style="color:#75715e"&gt;//artifacthub.io/packages/helm/podinfo/podinfo //这个是chart网页&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#a6e22e"&gt;version&lt;/span&gt;: &lt;span style="color:#ae81ff"&gt;6.13.0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;strong&gt;注意chart网页的 URL&lt;/strong&gt; ： 从里面拆解出&lt;strong&gt;chart的名字&lt;/strong&gt;&lt;/p&gt;</description></item><item><title> 创建个人的密码管理器: VaultWarden</title><link>https://yahoon.github.io/zh-cn/posts/setup-vaultwarden/</link><pubDate>Wed, 03 Jun 2026 00:00:00 +0000</pubDate><guid>https://yahoon.github.io/zh-cn/posts/setup-vaultwarden/</guid><description>&lt;h1 id="安装密码管理服务器-vaultwarden"&gt;安装密码管理服务器 VaultWarden&lt;/h1&gt;
+&lt;h2 id="背景"&gt;背景&lt;/h2&gt;
+&lt;p&gt;我一直使用bitwarden web 作为我的密码管理器，但是有些问题逐渐浮现：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;国内访问一直比较慢，可能是它的服务器在国外的原因&lt;/li&gt;
+&lt;li&gt;万一哪天被禁止访问了，该怎么办&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;经过一番比较和研究，我选择内部部署 &lt;code&gt;VaultWarden&lt;/code&gt;&lt;/p&gt;
+&lt;h3 id="为什么是它-vaultwarden"&gt;为什么是它？ VaultWarden!&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;自己部署bitwarden的成本: 虽然官方 Bitwarden 支持私人部署，但是由于它本身后端是用 .NET 写的，非常吃内存（通常需要 2GB~4GB RAM 以上），对我自己PC来说极不友好。而 Vaultwarden 极其轻量，&lt;strong&gt;只需要几十 MB 的内存&lt;/strong&gt;就能流畅运行。&lt;/li&gt;
+&lt;li&gt;兼容性: Vaultwarden完全兼容 Bitwarden 的官方 App 和浏览器插件。你只需要在客户端登录时，将“自定域（Self-hosted URL）”填写为你自己搭建的网址即可。&lt;/li&gt;
+&lt;li&gt;部署方式: Vaultwarden支持podman / Docker 一键部署， 而bitwarden需要的是docker/docker compose。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="介绍"&gt;介绍&lt;/h2&gt;
+&lt;p&gt;项目主页： &lt;a href="https://github.com/dani-garcia/vaultwarden"&gt;https://github.com/dani-garcia/vaultwarden&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;完全开源， 部署非常简单。&lt;/p&gt;
+&lt;p&gt;支持网页，Bitwarden 的官方 App 和浏览器插件访问。&lt;/p&gt;
+&lt;h3 id="宿主机"&gt;宿主机&lt;/h3&gt;
+&lt;p&gt;我将以我的台式机作为宿主机（OS: Ubuntu 26.04, IP: &lt;code&gt;192.168.1.4&lt;/code&gt;）&lt;/p&gt;
+&lt;h2 id="部署过程"&gt;部署过程&lt;/h2&gt;
+&lt;h3 id="step-0-准备ssl-证书"&gt;&lt;strong&gt;Step 0: 准备SSL 证书&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;VaultWarden 只有在HTTPS下才工作， 所以要先准备好服务器证书&lt;/p&gt;
+&lt;p&gt;在上一篇文章中我已经创建好了证书。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-Go" data-lang="Go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&amp;gt; &lt;span style="color:#a6e22e"&gt;mkdir&lt;/span&gt; &lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;home&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;yahoon&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;srv&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;vaultwarden&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;{&lt;span style="color:#a6e22e"&gt;data&lt;/span&gt;,&lt;span style="color:#a6e22e"&gt;ssl&lt;/span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#75715e"&gt;// move the key files&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#960050;background-color:#1e0010"&gt;❯&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;mv&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;vault&lt;/span&gt;.&lt;span style="color:#a6e22e"&gt;pem&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;vault&lt;/span&gt;&lt;span style="color:#f92672"&gt;-&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;key&lt;/span&gt;.&lt;span style="color:#a6e22e"&gt;pem&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;srv&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;vaultwarden&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;ssl&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#960050;background-color:#1e0010"&gt;❯&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;ls&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;srv&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;vaultwarden&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;ssl&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#a6e22e"&gt;vault&lt;/span&gt;&lt;span style="color:#f92672"&gt;-&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;key&lt;/span&gt;.&lt;span style="color:#a6e22e"&gt;pem&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;vault&lt;/span&gt;.&lt;span style="color:#a6e22e"&gt;pem&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="step-1-准备镜像"&gt;&lt;strong&gt;Step 1: 准备镜像&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;在客户机上：&lt;/p&gt;</description></item><item><title>为内网创建Root CA</title><link>https://yahoon.github.io/zh-cn/posts/create-rootca/</link><pubDate>Thu, 28 May 2026 00:00:00 +0000</pubDate><guid>https://yahoon.github.io/zh-cn/posts/create-rootca/</guid><description>&lt;h2 id="为内网创建root-ca"&gt;为内网创建Root CA&lt;/h2&gt;
+&lt;p&gt;因为我的内网的很多服务都是直接用IP运行的，这个带来的安全威胁不容忽视。在一个隔离的环境中，建立本地局域网的local Root CA非常重要。&lt;/p&gt;
+&lt;p&gt;使用的工具也非常简单=&amp;gt; &lt;strong&gt;&lt;code&gt;mkcert&lt;/code&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;h3 id="介绍-mkcert"&gt;介绍 mkcert&lt;/h3&gt;
+&lt;p&gt;mkcert 是一个0配置的本地CA 方案。&lt;/p&gt;
+&lt;p&gt;开源项目： &lt;a href="https://github.com/FiloSottile/mkcert"&gt;https://github.com/FiloSottile/mkcert&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id="安装环境"&gt;安装环境&lt;/h3&gt;
+&lt;p&gt;我把我的台式机作为宿主服务器（Ubuntu 26.04）,IP: &lt;code&gt;192.168.1.4&lt;/code&gt;&lt;/p&gt;
+&lt;h3 id="安装与部署"&gt;安装与部署&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-Go" data-lang="Go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#a6e22e"&gt;sudo&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;apt&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;install&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;libnss3&lt;/span&gt;&lt;span style="color:#f92672"&gt;-&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;tools&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;mkcert&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#75715e"&gt;// fedora上是nss-tools mkcert 这2个包&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h4 id="创建本地root-ca"&gt;创建本地root CA&lt;/h4&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-Go" data-lang="Go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#960050;background-color:#1e0010"&gt;❯&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;mkcert&lt;/span&gt; &lt;span style="color:#f92672"&gt;--&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;install&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#a6e22e"&gt;Created&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;a&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;new&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;local&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;CA&lt;/span&gt; &lt;span style="color:#960050;background-color:#1e0010"&gt;💥&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#a6e22e"&gt;The&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;local&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;CA&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;is&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;now&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;installed&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;in&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;the&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;system&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;trust&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;store&lt;/span&gt;! &lt;span style="color:#960050;background-color:#1e0010"&gt;⚡&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;️&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#a6e22e"&gt;The&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;local&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;CA&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;is&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;now&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;installed&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;in&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;the&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;Firefox&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;and&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;or&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;Chrome&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;Chromium&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;trust&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;store&lt;/span&gt; (&lt;span style="color:#a6e22e"&gt;requires&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;browser&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;restart&lt;/span&gt;)! &lt;span style="color:#960050;background-color:#1e0010"&gt;🦊&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#75715e"&gt;// 可见它已经导入了本机&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h4 id="创建第一个证书"&gt;创建第一个证书&lt;/h4&gt;
+&lt;p&gt;我的机器都是用IP直接访问的，服务器的IP是 192.168.1.4。 所以我的证书也是直接基于IP创建的&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-Go" data-lang="Go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#75715e"&gt;// vault.pem 是 证书文件&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#75715e"&gt;// vault-key.pem 是 私钥文件&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#960050;background-color:#1e0010"&gt;❯&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;mkcert&lt;/span&gt; &lt;span style="color:#f92672"&gt;-&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;cert&lt;/span&gt;&lt;span style="color:#f92672"&gt;-&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;file&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;vault&lt;/span&gt;.&lt;span style="color:#a6e22e"&gt;pem&lt;/span&gt; &lt;span style="color:#f92672"&gt;-&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;key&lt;/span&gt;&lt;span style="color:#f92672"&gt;-&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;file&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;vault&lt;/span&gt;&lt;span style="color:#f92672"&gt;-&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;key&lt;/span&gt;.&lt;span style="color:#a6e22e"&gt;pem&lt;/span&gt; &lt;span style="color:#ae81ff"&gt;192.168.1.4&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;localhost&lt;/span&gt; &lt;span style="color:#ae81ff"&gt;127.0.0.1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#a6e22e"&gt;Created&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;a&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;new&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;certificate&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;valid&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;for&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;the&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;following&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;names&lt;/span&gt; &lt;span style="color:#960050;background-color:#1e0010"&gt;📜&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#f92672"&gt;-&lt;/span&gt; &lt;span style="color:#e6db74"&gt;&amp;#34;192.168.1.4&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#f92672"&gt;-&lt;/span&gt; &lt;span style="color:#e6db74"&gt;&amp;#34;localhost&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#f92672"&gt;-&lt;/span&gt; &lt;span style="color:#e6db74"&gt;&amp;#34;127.0.0.1&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#a6e22e"&gt;The&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;certificate&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;is&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;at&lt;/span&gt; &lt;span style="color:#e6db74"&gt;&amp;#34;vault.pem&amp;#34;&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;and&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;the&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;key&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;at&lt;/span&gt; &lt;span style="color:#e6db74"&gt;&amp;#34;vault-key.pem&amp;#34;&lt;/span&gt; &lt;span style="color:#960050;background-color:#1e0010"&gt;✅&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#a6e22e"&gt;It&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;will&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;expire&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;on&lt;/span&gt; &lt;span style="color:#ae81ff"&gt;27&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;August&lt;/span&gt; &lt;span style="color:#ae81ff"&gt;2028&lt;/span&gt; &lt;span style="color:#960050;background-color:#1e0010"&gt;🗓&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h4 id="查看-root-ca"&gt;查看 root CA&lt;/h4&gt;
+&lt;p&gt;我们经常需要把root ca导入到客户机器，这样它们在访问这个CA 签发https网站时就不会报错了&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-GO" data-lang="GO"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#75715e"&gt;// 获得本地 root CA的目录&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#960050;background-color:#1e0010"&gt;❯&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;mkcert&lt;/span&gt; &lt;span style="color:#f92672"&gt;-&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;CAROOT&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;home&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;yahoon&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;.&lt;span style="color:#a6e22e"&gt;local&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;share&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;mkcert&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#960050;background-color:#1e0010"&gt;❯&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;cat&lt;/span&gt; &lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;home&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;yahoon&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;.&lt;span style="color:#a6e22e"&gt;local&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;share&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;mkcert&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;rootCA&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#a6e22e"&gt;rootCA&lt;/span&gt;&lt;span style="color:#f92672"&gt;-&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;key&lt;/span&gt;.&lt;span style="color:#a6e22e"&gt;pem&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;rootCA&lt;/span&gt;.&lt;span style="color:#a6e22e"&gt;pem&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#75715e"&gt;// rootCA.pem 是可以被共享的pub 证书&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#75715e"&gt;// rootCA-key.pm 是私钥，必须保密，永不泄漏&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h4 id="导入到客户端机器"&gt;导入到客户端机器&lt;/h4&gt;
+&lt;p&gt;以Fedora的客户机为例&lt;/p&gt;</description></item><item><title>快速安装Semaphore UI</title><link>https://yahoon.github.io/zh-cn/posts/install-semaphore/</link><pubDate>Wed, 27 May 2026 00:00:00 +0000</pubDate><guid>https://yahoon.github.io/zh-cn/posts/install-semaphore/</guid><description>&lt;h2 id="背景"&gt;背景&lt;/h2&gt;
+&lt;p&gt;我是一名 Ansible Automation Platform （AAP）的资深用户，深切感受到一个自动化平台的重要性。作为AAP的上游， &lt;a href="https://github.com/ansible/awx"&gt;&lt;strong&gt;AWX&lt;/strong&gt;&lt;/a&gt; 这个开源项目已经许久没有更新，最新版本还停留在 2024年.&lt;/p&gt;
+&lt;p&gt;这让我不得不寻求其他的替代工具。&lt;/p&gt;
+&lt;p&gt;通过AI 搜索，&lt;a href=""&gt;&lt;strong&gt;Semaphore UI&lt;/strong&gt;&lt;/a&gt; 脱颖而出。 它是一个类AAP的自动化运维平台， 有Web UI 且不光支持ansible, 还有terraform等。&lt;/p&gt;
+&lt;p&gt;官网： &lt;a href="https://semaphoreui.com/"&gt;https://semaphoreui.com/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;开源项目： &lt;a href="https://github.com/semaphoreui/semaphore"&gt;https://github.com/semaphoreui/semaphore&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id="宿主服务器"&gt;宿主服务器&lt;/h2&gt;
+&lt;p&gt;我将我的台式机部署服务器&lt;/p&gt;
+&lt;p&gt;OS: Ubuntu 26.04 ， 已经安装有 &lt;code&gt;podman&lt;/code&gt;&lt;/p&gt;
+&lt;h2 id="semaphore"&gt;Semaphore&lt;/h2&gt;
+&lt;h3 id="install"&gt;Install&lt;/h3&gt;
+&lt;p&gt;根据github主页推荐， 使用容器安装&lt;/p&gt;
+&lt;p&gt;若要下载其他格式，可参考：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;在主页上有安装向导 &lt;a href="https://semaphoreui.com/install"&gt;https://semaphoreui.com/install&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;下载各种包的地址： &lt;a href="https://github.com/semaphoreui/semaphore/releases"&gt;https://github.com/semaphoreui/semaphore/releases&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;打开 Docker安装引导页面 &lt;a href="https://semaphoreui.com/install/docker/2_18"&gt;https://semaphoreui.com/install/docker/2_18&lt;/a&gt; ， 填入定制化的选项，它就会自动生成命令&lt;/p&gt;
+&lt;p&gt;它给我的命令是&lt;/p&gt;
+&lt;pre tabindex="0"&gt;&lt;code&gt;docker run --name semaphore \
+-p 3000:3000 \
+-e SEMAPHORE_DB_DIALECT=sqlite \
+-e SEMAPHORE_ADMIN=admin \
+-e SEMAPHORE_ADMIN_PASSWORD=admin \
+-e SEMAPHORE_ADMIN_NAME=&amp;#34;Admin&amp;#34; \
+-e SEMAPHORE_ADMIN_EMAIL=semaphore-admin@yahoon.io \
+-v semaphore_data:/var/lib/semaphore \
+-v semaphore_config:/etc/semaphore \
+-v semaphore_tmp:/tmp/semaphore \
+-d semaphoreui/semaphore:v2.18.0
+&lt;/code&gt;&lt;/pre&gt;&lt;h4 id="准备semaphore-镜像"&gt;准备semaphore 镜像&lt;/h4&gt;
+&lt;p&gt;因为是homelab, 访问不了docker hub，所以我要先在开代理的模式下将以下镜像拉到本地&lt;/p&gt;</description></item><item><title>Home Lab诡异的机器互访失灵</title><link>https://yahoon.github.io/zh-cn/posts/pcs-access-inside-homelab/</link><pubDate>Mon, 25 May 2026 00:00:00 +0000</pubDate><guid>https://yahoon.github.io/zh-cn/posts/pcs-access-inside-homelab/</guid><description>&lt;h2 id="介绍"&gt;介绍&lt;/h2&gt;
+&lt;p&gt;在我的Home lab里面，我有两台Linux 机器：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Ubuntu 26.04 （IP: 192.168.1.4): 作为我的测试服务器，上面运行着我的PoC 环境&lt;/li&gt;
+&lt;li&gt;Fedora 44（IP: 192.168.1.142)：作为我的工作主机&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;一直以来，他们都工作的非常良好（我讨厌开机，登陆，和重新点开各个应用的等待时间，所以很少关机）。 每天我从我的工作机远程登录到ubuntu 服务器上做各种测试，直到这个周一。&lt;/p&gt;
+&lt;h2 id="问题描述"&gt;问题描述&lt;/h2&gt;
+&lt;p&gt;周一的早上，我继续准备从工作机ssh 到ubuntu 服务器上。 我看到之前的会话已经超时断开了，这是预想之中的，不值得大惊小怪。但是当我重新执行历史命令 &lt;code&gt;ssh 192.168.1.4&lt;/code&gt;时， 它竟然不动了。我再次确认，ping 也不行了。&lt;/p&gt;
+&lt;p&gt;我做了如下检查：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;两台机器都可以访问外网
+&lt;ol&gt;
+&lt;li&gt;ping baidu.com 和网关 192.168.1.1 =》 OK&lt;/li&gt;
+&lt;li&gt;访问外部网页 =》 OK&lt;/li&gt;
+&lt;li&gt;ip route show 显示路由和出口都正确&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;两台机器之间无法互通，ping和ssh都不行&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre tabindex="0"&gt;&lt;code&gt;# ping 192.168.1.4
+PING 192.168.1.4 (192.168.1.4) 56(84) bytes of data.
+From 192.168.1.142 icmp_seq=4 Destination Host Unreachable
+ping: sendmsg: No route to host
+&lt;/code&gt;&lt;/pre&gt;&lt;ol start="3"&gt;
+&lt;li&gt;两台机器的网络连接正常
+&lt;ol&gt;
+&lt;li&gt;ubuntu是有线连接&lt;/li&gt;
+&lt;li&gt;fedora是无线连接&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="排错"&gt;排错&lt;/h2&gt;
+&lt;h3 id="防火墙"&gt;&lt;strong&gt;防火墙&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;第一反应是防火墙问题：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;我把firewall service 完全关闭，但是不起作用&lt;/p&gt;</description></item><item><title>一场面试之后的思考</title><link>https://yahoon.github.io/zh-cn/posts/thoughts-interview-0522/</link><pubDate>Fri, 22 May 2026 00:00:00 +0000</pubDate><guid>https://yahoon.github.io/zh-cn/posts/thoughts-interview-0522/</guid><description>&lt;h2 id="过程与反思"&gt;过程与反思&lt;/h2&gt;
+&lt;p&gt;最近参与了几个面试，有一些总结和反思。&lt;/p&gt;
+&lt;p&gt;昨天参加了一个面试。面试官问我：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;“最近在做啥？”&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;“整理过去”&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;“有那么多要整理吗？”&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;“小二十年了积累的东西，能不多吗？”&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;即使就这最近的12年多的在红帽的所得，都还没有整理完。&lt;/p&gt;
+&lt;p&gt;在近20年的时间里面，基本就是前一天刚从上一家公司离职，第二天就进入新公司入职了。&lt;/p&gt;
+&lt;p&gt;尤其是一个运维人， 很少有超过三天不看工作相关的东西。&lt;/p&gt;
+&lt;p&gt;我应该是那种爱好广泛的人。 对啥都感兴趣，都想学。 现在就有了选择困难症。是坚持做技术还是开启新的赛道？&lt;/p&gt;
+&lt;p&gt;如果是坚持做技术，那么要充电： 审视自己的知识短板，有针对性的补足。&lt;/p&gt;
+&lt;p&gt;如果是转方向： 是做自媒体，还是接触新的行业？ 即使是做自媒体也有一万种要考虑的方向： 是继续做技术？还是转更人文的方向？&lt;/p&gt;
+&lt;p&gt;有一万条路可走。。。但大抵是迷茫，没有方向。但是我暂时的计划是还是继续精进自己，尽量还继续在技术的道路上寻找机会。&lt;/p&gt;
+&lt;p&gt;同时也持开放的心态去接触新的事物，做一些新的探索。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;如果你也处于这个阶段， 让我们的一起摸索同行！&lt;/strong&gt;&lt;/p&gt;
+&lt;h2 id="我最近的日志"&gt;我最近的日志&lt;/h2&gt;
+&lt;p&gt;&lt;img alt="1.jpg" loading="lazy" src="https://yahoon.github.io/pics/2026.05.22-thoughts-interview/1.png"&gt;&lt;/p&gt;</description></item><item><title>为Home Lab搭建Container Registry</title><link>https://yahoon.github.io/zh-cn/posts/install-registry-for-homelab/</link><pubDate>Wed, 20 May 2026 00:00:00 +0000</pubDate><guid>https://yahoon.github.io/zh-cn/posts/install-registry-for-homelab/</guid><description>&lt;h2 id="介绍"&gt;介绍&lt;/h2&gt;
+&lt;p&gt;我正在构建我的Home lab。 以前在公司各种服务都是开箱即用，我根本不会考虑某个服务被墙或者网速慢的问题。&lt;/p&gt;
+&lt;p&gt;可是home lab的网络环境很多网站不可以访问，或者说找不到免费的替代品, 最典型的就是&lt;a href="https://hub.docker.com/"&gt;docker hub&lt;/a&gt;。 所有只有自己搭建了。&lt;/p&gt;
+&lt;p&gt;我的需求很简单：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;只给home lab 内网使用&lt;/li&gt;
+&lt;li&gt;内网的任意机器可以push 和pull 镜像&lt;/li&gt;
+&lt;li&gt;http访问就行 (without https)&lt;/li&gt;
+&lt;li&gt;认证也不需要&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="服务器"&gt;服务器&lt;/h2&gt;
+&lt;p&gt;My desktop:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;OS: Ubuntu 26.04&lt;/li&gt;
+&lt;li&gt;IP: 192.168.1.4&lt;/li&gt;
+&lt;li&gt;暴露主机端口： 192.168.1.4:5000&lt;/li&gt;
+&lt;li&gt;当前普通用户 &lt;code&gt;yahoon&lt;/code&gt; (有sudo权限)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="steps"&gt;Steps&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;创建数据的持久化目录&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;registry data 放在当前用户 &lt;code&gt;srv/registry&lt;/code&gt; 下&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-Go" data-lang="Go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#960050;background-color:#1e0010"&gt;❯&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;cd&lt;/span&gt; &lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;home&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;yahoon&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;srv&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#75715e"&gt;// 数据放在专有的数据盘上&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#960050;background-color:#1e0010"&gt;❯&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;mkdir&lt;/span&gt; &lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;home&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;yahoon&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;mnt&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;registry&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#960050;background-color:#1e0010"&gt;❯&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;ln&lt;/span&gt; &lt;span style="color:#f92672"&gt;-&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;s&lt;/span&gt; &lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;home&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;yahoon&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;mnt&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;registry&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt; .
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&amp;gt; &lt;span style="color:#a6e22e"&gt;ll&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#a6e22e"&gt;lrwxrwxrwx&lt;/span&gt; &lt;span style="color:#ae81ff"&gt;1&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;yahoon&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;yahoon&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;registry&lt;/span&gt;&lt;span style="color:#960050;background-color:#1e0010"&gt;@&lt;/span&gt; &lt;span style="color:#f92672"&gt;-&lt;/span&gt;&amp;gt; &lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;home&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;yahoon&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;mnt&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;registry&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ol start="2"&gt;
+&lt;li&gt;&lt;strong&gt;在防火墙上放开 &lt;code&gt;5000/tcp&lt;/code&gt; 端口&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-Go" data-lang="Go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&amp;gt; &lt;span style="color:#a6e22e"&gt;sudo&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;ufw&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;allow&lt;/span&gt; &lt;span style="color:#ae81ff"&gt;5000&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;tcp&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&amp;gt; &lt;span style="color:#a6e22e"&gt;sudo&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;ufw&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;reload&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ol start="3"&gt;
+&lt;li&gt;&lt;strong&gt;启动 Registry 容器&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;我们给容器起名字为&lt;code&gt;local-registry&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-Go" data-lang="Go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#75715e"&gt;// 这个需要打开代理&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&amp;gt; &lt;span style="color:#a6e22e"&gt;podman&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;run&lt;/span&gt; &lt;span style="color:#f92672"&gt;-&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;d&lt;/span&gt; &lt;span style="color:#960050;background-color:#1e0010"&gt;\&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#f92672"&gt;-&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;p&lt;/span&gt; &lt;span style="color:#ae81ff"&gt;5000&lt;/span&gt;:&lt;span style="color:#ae81ff"&gt;5000&lt;/span&gt; &lt;span style="color:#960050;background-color:#1e0010"&gt;\&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#f92672"&gt;--&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;name&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;local&lt;/span&gt;&lt;span style="color:#f92672"&gt;-&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;registry&lt;/span&gt; &lt;span style="color:#960050;background-color:#1e0010"&gt;\&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#f92672"&gt;-&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;v&lt;/span&gt; &lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;home&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;yahoon&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;srv&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;registry&lt;/span&gt;:&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#66d9ef"&gt;var&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;lib&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;registry&lt;/span&gt; &lt;span style="color:#960050;background-color:#1e0010"&gt;\&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#a6e22e"&gt;docker&lt;/span&gt;.&lt;span style="color:#a6e22e"&gt;io&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;library&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;registry&lt;/span&gt;:&lt;span style="color:#ae81ff"&gt;2&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#75715e"&gt;// 因为是Ubuntu, 所以-v后面不需要:Z, 那是只适用于Selinux&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&amp;gt; &lt;span style="color:#a6e22e"&gt;podman&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;ps&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#a6e22e"&gt;CONTAINER&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;ID&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;IMAGE&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;COMMAND&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;CREATED&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;STATUS&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;PORTS&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;NAMES&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#ae81ff"&gt;9019e58&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;b7e71&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;docker&lt;/span&gt;.&lt;span style="color:#a6e22e"&gt;io&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;library&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;registry&lt;/span&gt;:&lt;span style="color:#ae81ff"&gt;2&lt;/span&gt; &lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;etc&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;docker&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;regis&lt;/span&gt;&lt;span style="color:#f92672"&gt;...&lt;/span&gt; &lt;span style="color:#ae81ff"&gt;3&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;seconds&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;ago&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;Up&lt;/span&gt; &lt;span style="color:#ae81ff"&gt;3&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;seconds&lt;/span&gt; &lt;span style="color:#ae81ff"&gt;0.0.0.0&lt;/span&gt;:&lt;span style="color:#ae81ff"&gt;5000&lt;/span&gt;&lt;span style="color:#f92672"&gt;-&lt;/span&gt;&amp;gt;&lt;span style="color:#ae81ff"&gt;5000&lt;/span&gt;&lt;span style="color:#f92672"&gt;/&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;tcp&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;local&lt;/span&gt;&lt;span style="color:#f92672"&gt;-&lt;/span&gt;&lt;span style="color:#a6e22e"&gt;registry&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ol start="4"&gt;
+&lt;li&gt;&lt;strong&gt;开启用户进程常驻&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;在 Ubuntu / RHEL / Fedora 中，如果普通用户 &lt;code&gt;yahoon&lt;/code&gt; 断开了 SSH 连接（登出），系统默认会回收该用户的所有后台进程（容器也会随之挂起）。执行以下命令，允许 &lt;code&gt;yahoon&lt;/code&gt; 用户的服务在不登录时依然在后台保持运行：&lt;/p&gt;</description></item><item><title>在Fedora上安装词典</title><link>https://yahoon.github.io/zh-cn/posts/install-dict-on-fedora/</link><pubDate>Tue, 19 May 2026 00:00:00 +0000</pubDate><guid>https://yahoon.github.io/zh-cn/posts/install-dict-on-fedora/</guid><description>&lt;h2 id="介绍"&gt;介绍&lt;/h2&gt;
+&lt;p&gt;作为离职流程的一部分，我不得不重新配置我的个人笔记本。 一切都要重新开始， 从iso 系统镜像，到系统安装，到配置到可以工作, 它并没有看起来那么容易。&lt;/p&gt;
+&lt;p&gt;尤其是我发现即使一些最普通的工具我都要从头开始学习和安装时。（也可能我之前关注的太少）。&lt;/p&gt;
+&lt;p&gt;对于母语非英语的人士， 词典是必须品。 可惜我喜欢的&lt;a href="https://immersivetranslate.com"&gt;&lt;strong&gt;沉浸式翻译&lt;/strong&gt;&lt;/a&gt;竟然没有PC 客户端。&lt;/p&gt;
+&lt;p&gt;已经把Linux作为桌面系统已经十余年了。 或许是因为习惯，抑或是有点懒。 我还是会把相当部分的工作使用Linux桌面完成。所以我就 Fedora上最有名的词典工具 &lt;strong&gt;Goldendict&lt;/strong&gt;。&lt;/p&gt;
+&lt;h2 id="goldendict"&gt;Goldendict&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Home page: &lt;a href="http://goldendict.org/"&gt;http://goldendict.org/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Github page: &lt;a href="https://github.com/goldendict/goldendict/tree/master"&gt;https://github.com/goldendict/goldendict/tree/master&lt;/a&gt;
+// 这是老的版本， 现在有了新版，叫做 &lt;a href="https://github.com/xiaoyifang/goldendict-ng"&gt;goldendict-ng&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="goldendict-ng"&gt;Goldendict-ng&lt;/h2&gt;
+&lt;p&gt;&lt;a href="https://github.com/xiaoyifang/goldendict-ng"&gt;https://github.com/xiaoyifang/goldendict-ng&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;文档： &lt;a href="https://xiaoyifang.github.io/goldendict-ng/"&gt;https://xiaoyifang.github.io/goldendict-ng/&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id="安装"&gt;安装&lt;/h3&gt;
+&lt;p&gt;我们使用F43, 直接安装新的ng版本：&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;❯ sudo dnf install goldendict-ng&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;// 如果要安装旧版
+&lt;code&gt;❯ sudo dnf install goldendict&lt;/code&gt;&lt;/p&gt;
+&lt;h3 id="启动"&gt;启动&lt;/h3&gt;
+&lt;h4 id="命令行启动"&gt;命令行启动&lt;/h4&gt;
+&lt;p&gt;直接运行 &lt;code&gt;goldendict-ng&lt;/code&gt; 会报错 &lt;strong&gt;Segmentation fault (core dumped)&lt;/strong&gt;， 运行如下命令来启动&lt;/p&gt;
+&lt;pre tabindex="0"&gt;&lt;code&gt;QT_QPA_PLATFORM=xcb goldendict-ng
+&lt;/code&gt;&lt;/pre&gt;&lt;h4 id="菜单启动"&gt;菜单启动&lt;/h4&gt;
+&lt;pre tabindex="0"&gt;&lt;code&gt;❯ cp /usr/share/applications/io.github.xiaoyifang.goldendict_ng.desktop ~/.local/share/applications/
+❯ vi ~/.local/share/applications/io.github.xiaoyifang.goldendict_ng.desktop
+// 找到 `Exec=` 这一行，修改为：
+Exec=env QT_QPA_PLATFORM=xcb goldendict-ng %u
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id="增加词典"&gt;增加词典&lt;/h3&gt;
+&lt;p&gt;刚安装好的 GoldenDict-NG 可能是空的。你可以通过以下两种方式让它支持中英文互译：&lt;/p&gt;</description></item><item><title>小九 - 我的小猫</title><link>https://yahoon.github.io/zh-cn/posts/about-xiaojiu/</link><pubDate>Mon, 18 May 2026 00:00:00 +0000</pubDate><guid>https://yahoon.github.io/zh-cn/posts/about-xiaojiu/</guid><description>&lt;h2 id="介绍我的小猫---小九"&gt;介绍我的小猫 - 小九&lt;/h2&gt;
+&lt;h3 id="身份"&gt;身份&lt;/h3&gt;
+&lt;p&gt;姓名： 小九&lt;/p&gt;
+&lt;p&gt;出生年月： 2022年2月&lt;/p&gt;
+&lt;p&gt;性别： 雄性&lt;/p&gt;
+&lt;p&gt;性格： 懒，时而温顺，时而暴躁， 话不多&lt;/p&gt;
+&lt;h3 id="来历"&gt;来历&lt;/h3&gt;
+&lt;p&gt;它是一只流浪猫，在2022年3月3日，刚满一个月的它钻到了我的车里。 从此它就正式成为我们家庭的一员了。&lt;/p&gt;
+&lt;p&gt;它的名字就来自于这个特殊的日子， 3月3日，不自觉的就想起了《九九乘法表》里面的“三三得九”。&lt;/p&gt;
+&lt;h3 id="日常"&gt;日常&lt;/h3&gt;
+&lt;p&gt;&lt;img alt="1.jpg" loading="lazy" src="https://yahoon.github.io/pics/2026.05.18-about-xiaojiu/1.jpg"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="2.jpg" loading="lazy" src="https://yahoon.github.io/pics/2026.05.18-about-xiaojiu/2.jpg"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="3.jpg" loading="lazy" src="https://yahoon.github.io/pics/2026.05.18-about-xiaojiu/3.jpg"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="4.jpg" loading="lazy" src="https://yahoon.github.io/pics/2026.05.18-about-xiaojiu/4.jpg"&gt;&lt;/p&gt;</description></item><item><title>在Windows 11 安装WSL</title><link>https://yahoon.github.io/zh-cn/posts/install-wsl-on-win11/</link><pubDate>Fri, 15 May 2026 00:00:00 +0000</pubDate><guid>https://yahoon.github.io/zh-cn/posts/install-wsl-on-win11/</guid><description>&lt;h1 id="intro"&gt;Intro&lt;/h1&gt;
+&lt;p&gt;WSL: Windows Subsystem for Linux&lt;/p&gt;
+&lt;p&gt;WSL是嵌在Windows里面的超小Linux VM, 默认是ubuntu&lt;/p&gt;
+&lt;p&gt;主页：
+&lt;a href="https://github.com/microsoft/WSL"&gt;https://github.com/microsoft/WSL&lt;/a&gt;&lt;/p&gt;
+&lt;h1 id="一键安装在线安装"&gt;一键安装（在线安装）&lt;/h1&gt;
+&lt;pre tabindex="0"&gt;&lt;code&gt;wsl --install
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;问题： &lt;code&gt;wsl --install&lt;/code&gt; 非常慢，主要是因为微软境外源在国内带宽差。&lt;strong&gt;最快解决：离线手动安装（国内镜像下载）&lt;/strong&gt;，几分钟搞定&lt;/p&gt;
+&lt;h1 id="手工安装离线安装"&gt;手工安装（离线安装）&lt;/h1&gt;
+&lt;h2 id="前置说明"&gt;前置说明&lt;/h2&gt;
+&lt;p&gt;Windows11 家庭版&lt;strong&gt;完全支持 WSL2&lt;/strong&gt;，无需 Hyper-V，只用开启两个系统功能、安装你下载的 MSI、导入 wsl 镜像即可，全程离线可用。&lt;/p&gt;
+&lt;h2 id="步骤-0下载"&gt;步骤 0：下载&lt;/h2&gt;
+&lt;h3 id="wsl程序"&gt;wsl程序&lt;/h3&gt;
+&lt;p&gt;&lt;a href="https://github.com/microsoft/WSL/releases"&gt;https://github.com/microsoft/WSL/releases&lt;/a&gt;
+下载 &lt;a href="https://github.com/microsoft/WSL/releases/download/2.7.3/wsl.2.7.3.0.x64.msi"&gt;wsl.2.7.3.0.x64.msi&lt;/a&gt;文件&lt;/p&gt;
+&lt;h3 id="ubuntu-wsl文件"&gt;Ubuntu wsl文件&lt;/h3&gt;
+&lt;p&gt;根据 &lt;a href="https://github.com/microsoft/WSL/blob/master/distributions/DistributionInfo.json"&gt;https://github.com/microsoft/WSL/blob/master/distributions/DistributionInfo.json&lt;/a&gt; 文件，里面有各个distro的url。&lt;/p&gt;
+&lt;p&gt;找到https://releases.ubuntu.com/26.04/ 的 WSL image的下载链接， 下载&lt;a href="https://releases.ubuntu.com/26.04/ubuntu-26.04-wsl-amd64.wsl"&gt;ubuntu-26.04-wsl-amd64.wsl&lt;/a&gt;文件&lt;/p&gt;
+&lt;p&gt;把以上两个文件放在一个全英文的路径下比如： &lt;code&gt;D:\wsl&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;附加国内高速地址（未验证）&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;用浏览器 / 迅雷下载：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;WSL2 内核（msi）&lt;/strong&gt;
+- 地址：&lt;a href="https://gh-proxy.org/https://github.com/microsoft/WSL/releases/download/2.7.1/wsl.2.7.1.0.x64.msi"&gt;https://gh-proxy.org/https://github.com/microsoft/WSL/releases/download/2.7.1/wsl.2.7.1.0.x64.msi&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Ubuntu 22.04（tar.gz）&lt;/strong&gt;（清华镜像）
+- 地址：&lt;a href="https://mirrors.tuna.tsinghua.edu.cn/ubuntu-releases-wsl/22.04/ubuntu-22.04-wsl-amd64.tar.gz"&gt;https://mirrors.tuna.tsinghua.edu.cn/ubuntu-releases-wsl/22.04/ubuntu-22.04-wsl-amd64.tar.gz&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;保存到：&lt;code&gt;D:\wsl\&lt;/code&gt;（&lt;strong&gt;纯英文路径&lt;/strong&gt;）&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id="步骤-1开启-wsl-必备系统功能"&gt;步骤 1：开启 WSL 必备系统功能&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;右键开始菜单 → 选择&lt;strong&gt;Windows 终端 (管理员)&lt;/strong&gt; 或 &lt;strong&gt;PowerShell (管理员)&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;依次执行两条命令，不用重启：&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre tabindex="0"&gt;&lt;code&gt;dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
+dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
+&lt;/code&gt;&lt;/pre&gt;&lt;ol start="3"&gt;
+&lt;li&gt;&lt;strong&gt;重启电脑&lt;/strong&gt;生效&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr&gt;
+&lt;h2 id="步骤-2安装-wsl-核心-msi-包"&gt;步骤 2：安装 WSL 核心 MSI 包&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;找到你下载的 &lt;code&gt;wsl.2.7.3.0.x64.msi&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;双击直接安装&lt;/strong&gt;，一路下一步默认即可&lt;/li&gt;
+&lt;li&gt;安装完关闭窗口，不用额外配置&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr&gt;
+&lt;h2 id="步骤-3导入-ubuntu2604-wsl-镜像"&gt;步骤 3：导入 Ubuntu26.04 .wsl 镜像&lt;/h2&gt;
+&lt;p&gt;双击ubuntu-26.04-wsl-amd64.wsl 文件，会自动倒入。&lt;/p&gt;</description></item><item><title>关于我</title><link>https://yahoon.github.io/zh-cn/posts/about-me/</link><pubDate>Thu, 14 May 2026 00:00:00 +0000</pubDate><guid>https://yahoon.github.io/zh-cn/posts/about-me/</guid><description>&lt;h2 id="个人简介"&gt;个人简介&lt;/h2&gt;
+&lt;h3 id="yahoon-yao"&gt;&lt;strong&gt;Yahoon Yao&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;工程师、开源倡导者、技术写作者、终身学习者&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;拥有超过20年经验的IT老兵，涵盖Linux、云计算、AWS、Ansible、基础设施运维和DevOps等领域。&lt;/p&gt;
+&lt;p&gt;关于我的一些关键词：&lt;strong&gt;开源&lt;/strong&gt; | &lt;strong&gt;Linux&lt;/strong&gt; | &lt;strong&gt;SRE&lt;/strong&gt; | &lt;strong&gt;云计算&lt;/strong&gt; | &lt;strong&gt;AWS&lt;/strong&gt; | &lt;strong&gt;GCP&lt;/strong&gt; | &lt;strong&gt;Terraform&lt;/strong&gt; | &lt;strong&gt;Golden VM镜像构建&lt;/strong&gt; | &lt;strong&gt;DevOps&lt;/strong&gt; | &lt;strong&gt;CI/CD&lt;/strong&gt; | &lt;strong&gt;Kubernetes&lt;/strong&gt; | &lt;strong&gt;Python&lt;/strong&gt; | &lt;strong&gt;Go&lt;/strong&gt; | &lt;strong&gt;AI编程&lt;/strong&gt; | &lt;strong&gt;监控&lt;/strong&gt;&lt;/p&gt;
+&lt;h2 id="详细信息"&gt;详细信息&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;20年以上企业级运维与管理经验，专注于基础设施和应用运维。精通从流程标准化到落地执行的全链路运维管理，具备扎实的理论基础和丰富的实践经验。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;精通Red Hat全系列产品，熟练运用Linux、Ansible、Satellite、OpenShift、OpenStack等核心工具，具备全栈运维能力。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;擅长DevOps自动化及CI/CD流水线（GitLab、Tekton）。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;熟练使用Python、Bash、Go进行自动化服务与工具独立开发，善于借助AI工具（Claude、OpenCode、Skills）提升工作效率。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;优秀的书面与口头表达能力，注重知识的标准化、代码化与文档化。具备出色的团队管理、培训与指导能力。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;自驱力强，对AI、IaaS、SRE等新兴技术有浓厚兴趣，持续学习与迭代。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;流利的英文书面与口头沟通能力，能够无缝进行跨境协作。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;语言：中文（母语）、英语。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;另有一个访问量超过170万的&lt;a href="https://blog.51cto.com/yahoon"&gt;中文博客&lt;/a&gt;，用于分享知识与思考。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="认证"&gt;认证&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;CKA（认证Kubernetes管理员）&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;RHCA（红帽认证架构师）&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;AWS解决方案架构师&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;CSM （认证Scrum Master）&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;ITIL Foundation&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Zabbix认证专家&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;PMI认证项目管理专业人士（PMP）&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="联系我"&gt;联系我&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://www.linkedin.com/in/hong-yao-cn"&gt;LinkedIn&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="yahoon1982@google.com"&gt;邮箱&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>

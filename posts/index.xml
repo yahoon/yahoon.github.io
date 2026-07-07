@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Posts on Yahoon's Tech &amp; Tales</title><link>https://yahoon.github.io/posts/</link><description>Recent content in Posts on Yahoon's Tech &amp; Tales</description><generator>Hugo</generator><language>en-US</language><lastBuildDate>Tue, 07 Jul 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://yahoon.github.io/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>Send email via Public SMTP by CLI</title><link>https://yahoon.github.io/posts/send-mail-from-cli/</link><pubDate>Tue, 07 Jul 2026 00:00:00 +0000</pubDate><guid>https://yahoon.github.io/posts/send-mail-from-cli/</guid><description>&lt;h2 id="send-mail-via-public-smtp-by-cli"&gt;Send mail via Public SMTP by CLI&lt;/h2&gt;
+&lt;p&gt;I needed to configure an alerting feature that sends emails from my local machine (Fedora 44) to a public email server via the command line.&lt;/p&gt;
+&lt;p&gt;Installing Postfix locally is not a good choice, because public email services all perform strict checks to prevent spam.&lt;/p&gt;
+&lt;p&gt;Plan: I have a 126.com email account, so I&amp;rsquo;ll use 126.com&amp;rsquo;s SMTP server.&lt;/p&gt;
+&lt;h3 id="step-1-get-your-126com-authorization-code"&gt;Step 1: Get your 126.com Authorization Code&lt;/h3&gt;
+&lt;p&gt;For security reasons, &lt;code&gt;126.com&lt;/code&gt; will &lt;strong&gt;not&lt;/strong&gt; let you use your regular login password in the terminal. You need an app-specific password.&lt;/p&gt;</description></item><item><title>Role vs Policy in AWS IAM</title><link>https://yahoon.github.io/posts/role-vs-policy-in-aws-iam/</link><pubDate>Fri, 03 Jul 2026 00:00:00 +0000</pubDate><guid>https://yahoon.github.io/posts/role-vs-policy-in-aws-iam/</guid><description>&lt;p&gt;User and permission management in AWS is done through IAM. The two more complex concepts in IAM are Role and Policy. This article summarizes what I have learned and understood.&lt;/p&gt;
+&lt;h1 id="aws-iam-key-points-role-vs-policy"&gt;AWS IAM Key Points: Role vs Policy&lt;/h1&gt;
+&lt;h2 id="what-is-a-role"&gt;What is a Role&lt;/h2&gt;
+&lt;p&gt;A Role itself is just an empty shell; it contains two parts of configuration inside:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Trust Policy:&lt;/strong&gt; Determines &lt;strong&gt;who&lt;/strong&gt; is eligible to wear this hat (it could be an EC2 server, a Lambda function, or a user in another AWS account). This is where you specify the principal (who).&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Permission Policy:&lt;/strong&gt; Determines &lt;strong&gt;what actions&lt;/strong&gt; can be performed while wearing this hat (this binds the &lt;strong&gt;Policy&lt;/strong&gt; introduced above). This is where you specify what actions.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="what-is-a-policy"&gt;What is a Policy&lt;/h2&gt;
+&lt;p&gt;A policy is a JSON file that defines deny and allow actions.&lt;/p&gt;</description></item><item><title>Deploy ArgoCD Application from Local GitLab</title><link>https://yahoon.github.io/posts/deploy-argo-app-from-local-gitlab/</link><pubDate>Mon, 15 Jun 2026 00:00:00 +0000</pubDate><guid>https://yahoon.github.io/posts/deploy-argo-app-from-local-gitlab/</guid><description>&lt;h1 id="deploy-applications-from-local-git-repo-with-argocd"&gt;Deploy Applications from Local Git Repo with ArgoCD&lt;/h1&gt;
+&lt;p&gt;This article walks through the entire process of using ArgoCD to deploy an application from a GitLab repo in my home lab (a restricted-access environment).&lt;/p&gt;
+&lt;h2 id="home-lab-env"&gt;Home Lab Env&lt;/h2&gt;
+&lt;p&gt;The following services are running in the home lab:&lt;/p&gt;
+&lt;h3 id="gitlab-server"&gt;GitLab server:&lt;/h3&gt;
+&lt;p&gt;http://192.168.1.4:8080/&lt;/p&gt;
+&lt;h3 id="k8s-cluster"&gt;K8s Cluster&lt;/h3&gt;
+&lt;p&gt;I have a 3-node k8s cluster: 1 master, 2 workers&lt;/p&gt;
+&lt;pre tabindex="0"&gt;&lt;code&gt;❯ kubectl cluster-info
+Kubernetes control plane is running at https://192.168.1.101:6443
+CoreDNS is running at https://192.168.1.101:6443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+To further debug and diagnose cluster problems, use &amp;#39;kubectl cluster-info dump&amp;#39;.
+❯ kubectl get no
+NAME STATUS ROLES AGE VERSION
+k8s-master Ready control-plane 25d v1.36.0
+k8s-worker1 Ready &amp;lt;none&amp;gt; 25d v1.36.0
+k8s-worker2 Ready &amp;lt;none&amp;gt; 25d v1.36.0
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id="argocd"&gt;ArgoCD&lt;/h3&gt;
+&lt;p&gt;ArgoCD is deployed&lt;/p&gt;</description></item><item><title>Install Helm Chart from tgz File</title><link>https://yahoon.github.io/posts/install-helm-chart-from-tgz/</link><pubDate>Tue, 09 Jun 2026 00:00:00 +0000</pubDate><guid>https://yahoon.github.io/posts/install-helm-chart-from-tgz/</guid><description>&lt;blockquote&gt;
+&lt;p&gt;Originally posted on &lt;strong&gt;yahoon.github.io&lt;/strong&gt;. This is original content; please provide a backlink to the original post if you wish to cross-post.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="offline-installation-of-helm-chart-targz-file"&gt;Offline Installation of Helm Chart (tar.gz File)&lt;/h2&gt;
+&lt;p&gt;Recently I&amp;rsquo;ve been learning Helm. As an operations engineer, I haven&amp;rsquo;t had much exposure to deploying applications on K8s, so I decided to get some hands-on practice.&lt;/p&gt;
+&lt;p&gt;Using the official &lt;strong&gt;podinfo&lt;/strong&gt; chart, the steps are as follows:&lt;/p&gt;
+&lt;h4 id="step-1-pull-the-chart"&gt;Step 1: Pull the Chart&lt;/h4&gt;
+&lt;p&gt;The chart package itself is a tar.gz archive.&lt;/p&gt;</description></item><item><title>Setting Up Your Personal Password Manager: VaultWarden</title><link>https://yahoon.github.io/posts/setup-vaultwarden/</link><pubDate>Wed, 03 Jun 2026 00:00:00 +0000</pubDate><guid>https://yahoon.github.io/posts/setup-vaultwarden/</guid><description>&lt;h1 id="installing-the-password-management-server-vaultwarden"&gt;Installing the Password Management Server VaultWarden&lt;/h1&gt;
+&lt;h2 id="background"&gt;Background&lt;/h2&gt;
+&lt;p&gt;I&amp;rsquo;ve been using Bitwarden as my password manager, but some issues have gradually emerged:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Access from China is always slow, probably because the servers are overseas&lt;/li&gt;
+&lt;li&gt;What if one day it gets blocked?&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;After some comparison and research, I chose to self-host &lt;code&gt;VaultWarden&lt;/code&gt;&lt;/p&gt;
+&lt;h3 id="why-vaultwarden"&gt;Why VaultWarden?&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Cost of self-hosting Bitwarden&lt;/strong&gt;: Although the official Bitwarden supports self-hosting, its backend is written in .NET and is very memory-hungry (typically requires 2GB~4GB+ RAM), which is unfriendly for my PC. Vaultwarden, on the other hand, is extremely lightweight, requiring only &lt;strong&gt;tens of MB of RAM&lt;/strong&gt; to run smoothly.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Compatibility&lt;/strong&gt;: Vaultwarden is fully compatible with Bitwarden&amp;rsquo;s official apps and browser extensions. You just need to fill in your self-hosted URL in the &amp;ldquo;Self-hosted URL&amp;rdquo; field when logging in on the client side.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Deployment&lt;/strong&gt;: Vaultwarden supports one-click deployment with Podman / Docker, while Bitwarden requires Docker Compose.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="introduction"&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;Project page: &lt;a href="https://github.com/dani-garcia/vaultwarden"&gt;https://github.com/dani-garcia/vaultwarden&lt;/a&gt;&lt;/p&gt;</description></item><item><title>Create Root CA for Home Lab</title><link>https://yahoon.github.io/posts/create-rootca/</link><pubDate>Thu, 28 May 2026 00:00:00 +0000</pubDate><guid>https://yahoon.github.io/posts/create-rootca/</guid><description>&lt;h2 id="background"&gt;Background&lt;/h2&gt;
+&lt;p&gt;Many services on my local network run directly over IP, which poses a security threat that cannot be ignored. In an isolated environment, it is important to set up a local Root CA for the LAN.&lt;/p&gt;
+&lt;p&gt;The tool used is very simple =&amp;gt; &lt;strong&gt;&lt;code&gt;mkcert&lt;/code&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;h3 id="about-mkcert"&gt;About mkcert&lt;/h3&gt;
+&lt;p&gt;mkcert is a zero-configuration local CA solution.&lt;/p&gt;
+&lt;p&gt;Open source project: &lt;a href="https://github.com/FiloSottile/mkcert"&gt;https://github.com/FiloSottile/mkcert&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id="environment"&gt;Environment&lt;/h3&gt;
+&lt;p&gt;Use my desktop as the hosting server, it is &lt;code&gt;Ubuntu 26.04&lt;/code&gt;, IP: &lt;code&gt;192.168.1.4&lt;/code&gt;&lt;/p&gt;</description></item><item><title>Semaphore UI Quick Install</title><link>https://yahoon.github.io/posts/install-semaphore/</link><pubDate>Wed, 27 May 2026 00:00:00 +0000</pubDate><guid>https://yahoon.github.io/posts/install-semaphore/</guid><description>&lt;h2 id="background"&gt;Background&lt;/h2&gt;
+&lt;p&gt;I&amp;rsquo;m a long-time user of Ansible Automation Platform (AAP), and I deeply understand the importance of an automation platform. As the upstream of AAP, the open-source project &lt;a href="https://github.com/ansible/awx"&gt;&lt;strong&gt;AWX&lt;/strong&gt;&lt;/a&gt; hasn&amp;rsquo;t been updated for a while, with the latest version still stuck in 2024.&lt;/p&gt;
+&lt;p&gt;This forced me to look for alternative tools.&lt;/p&gt;
+&lt;p&gt;Through an AI search, &lt;a href=""&gt;&lt;strong&gt;Semaphore UI&lt;/strong&gt;&lt;/a&gt; stood out. It&amp;rsquo;s an AAP-like automation operations platform with a Web UI that supports not only Ansible but also Terraform and others.&lt;/p&gt;</description></item><item><title>Mysterious Machine Intercommunication Failure in Home Lab</title><link>https://yahoon.github.io/posts/pcs-access-inside-homelab/</link><pubDate>Mon, 25 May 2026 00:00:00 +0000</pubDate><guid>https://yahoon.github.io/posts/pcs-access-inside-homelab/</guid><description>&lt;h2 id="introduction"&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;In my home lab, I have two Linux machines:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Ubuntu 26.04 (IP: 192.168.1.4): acts as my test server, running my PoC environment&lt;/li&gt;
+&lt;li&gt;Fedora 44 (IP: 192.168.1.142): acts as my workstation&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;They have been working perfectly well (I hate the waiting time for booting, logging in, and reopening applications, so I rarely shut them down). Every day I SSH from my workstation to the Ubuntu server for various tests, until this Monday.&lt;/p&gt;</description></item><item><title>Thoughts after an Interview</title><link>https://yahoon.github.io/posts/thoughts-interview-0522/</link><pubDate>Fri, 22 May 2026 00:00:00 +0000</pubDate><guid>https://yahoon.github.io/posts/thoughts-interview-0522/</guid><description>&lt;h2 id="the-whole-story"&gt;The Whole Story&lt;/h2&gt;
+&lt;p&gt;I&amp;rsquo;ve attended several interviews recently, one of which sparked some deep self-reflection.&lt;/p&gt;
+&lt;p&gt;Had an interview yesterday, and the interviewer asked me:&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&amp;ldquo;What have you been up to lately?&amp;rdquo;&lt;/strong&gt;&lt;br&gt;
+&lt;strong&gt;&amp;ldquo;Organizing my past.&amp;rdquo;&lt;/strong&gt;&lt;br&gt;
+&lt;strong&gt;&amp;ldquo;Is there really that much to organize?&amp;rdquo;&lt;/strong&gt;&lt;br&gt;
+&lt;strong&gt;&amp;ldquo;Nearly twenty years of career accumulation—how could there not be?&amp;rdquo;&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Even looking just at my last 12+ years at Red Hat, I’m still far from finishing sorting through everything I&amp;rsquo;ve gained.&lt;/p&gt;</description></item><item><title>Setup Container Registry for Home Lab</title><link>https://yahoon.github.io/posts/install-registry-for-homelab/</link><pubDate>Wed, 20 May 2026 00:00:00 +0000</pubDate><guid>https://yahoon.github.io/posts/install-registry-for-homelab/</guid><description>&lt;h2 id="introduction"&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;I&amp;rsquo;m building my home lab. In corporate environments, various services are ready to use out of the box, so I&amp;rsquo;ve never had to worry about services being blocked or slow network speeds.&lt;/p&gt;
+&lt;p&gt;However, in a home lab network environment, many websites are inaccessible, or it&amp;rsquo;s hard to find free alternatives. The most typical example is &lt;a href="https://hub.docker.com/"&gt;Docker Hub&lt;/a&gt;. So I had to set up my own.&lt;/p&gt;
+&lt;p&gt;My requirements are simple:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Only for use within the home lab intranet&lt;/li&gt;
+&lt;li&gt;Any machine on the intranet can push and pull images&lt;/li&gt;
+&lt;li&gt;HTTP access is sufficient (no HTTPS needed)&lt;/li&gt;
+&lt;li&gt;No authentication required&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="server"&gt;Server&lt;/h2&gt;
+&lt;p&gt;My desktop:&lt;/p&gt;</description></item><item><title>Install Dictionary on Fedora</title><link>https://yahoon.github.io/posts/install-dict-on-fedora/</link><pubDate>Tue, 19 May 2026 00:00:00 +0000</pubDate><guid>https://yahoon.github.io/posts/install-dict-on-fedora/</guid><description>&lt;h2 id="background"&gt;Background&lt;/h2&gt;
+&lt;p&gt;As part of the starting a new journey, I had to reconfigure my personal laptop. Everything had to start from scratch — from the ISO image, to system installation, to configuration, to being fully functional. It wasn&amp;rsquo;t as easy as it seemed.&lt;/p&gt;
+&lt;p&gt;Especially when I realized that, even for some of the most common tools, I had to learn and install from scratch (or maybe I just hadn&amp;rsquo;t paid enough attention before).&lt;/p&gt;</description></item><item><title>Xiaojiu - My Cat</title><link>https://yahoon.github.io/posts/about-xiaojiu/</link><pubDate>Mon, 18 May 2026 00:00:00 +0000</pubDate><guid>https://yahoon.github.io/posts/about-xiaojiu/</guid><description>&lt;h2 id="introducing-my-kitty---xiaojiu"&gt;Introducing My Kitty - Xiaojiu&lt;/h2&gt;
+&lt;h3 id="who-is-he"&gt;Who is he&lt;/h3&gt;
+&lt;p&gt;Name: Xiaojiu&lt;/p&gt;
+&lt;p&gt;Birth: February 2022&lt;/p&gt;
+&lt;p&gt;Gender: Male&lt;/p&gt;
+&lt;p&gt;Personality: Lazy, sometimes gentle, sometimes grumpy, not very talkative&lt;/p&gt;
+&lt;h3 id="when-the-story-started"&gt;When the story started&lt;/h3&gt;
+&lt;p&gt;It was a stray cat. On March 3, 2022, just one month old, it crawled into my car. From then on, it officially became a member of our family.&lt;/p&gt;
+&lt;p&gt;Its name comes from this special day—March 3rd. Unconsciously, it reminded me of &amp;ldquo;San San De Jiu (三三得九)&amp;rdquo; from the Chinese multiplication table《九九乘法表》.&lt;/p&gt;</description></item><item><title>Install WSL on Windows 11</title><link>https://yahoon.github.io/posts/install-wsl-on-win11/</link><pubDate>Fri, 15 May 2026 00:00:00 +0000</pubDate><guid>https://yahoon.github.io/posts/install-wsl-on-win11/</guid><description>&lt;h1 id="intro"&gt;Intro&lt;/h1&gt;
+&lt;p&gt;WSL: Windows Subsystem for Linux&lt;/p&gt;
+&lt;p&gt;WSL is a tiny Linux VM embedded in Windows, default is Ubuntu.&lt;/p&gt;
+&lt;p&gt;Homepage: &lt;a href="https://github.com/microsoft/WSL"&gt;https://github.com/microsoft/WSL&lt;/a&gt;&lt;/p&gt;
+&lt;h1 id="one-click-install-online-install"&gt;One-Click Install (Online Install)&lt;/h1&gt;
+&lt;pre tabindex="0"&gt;&lt;code&gt;wsl --install
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Issue: &lt;code&gt;wsl --install&lt;/code&gt; is very slow, mainly because Microsoft&amp;rsquo;s overseas servers have poor bandwidth in China. &lt;strong&gt;Fastest solution: Offline manual install (domestic mirror download)&lt;/strong&gt;, done in a few minutes.&lt;/p&gt;
+&lt;h1 id="manual-install-offline-install"&gt;Manual Install (Offline Install)&lt;/h1&gt;
+&lt;h2 id="prerequisites"&gt;Prerequisites&lt;/h2&gt;
+&lt;p&gt;Windows 11 Home &lt;strong&gt;fully supports WSL2&lt;/strong&gt;, no Hyper-V required. Just enable two system features, install the MSI you downloaded, and import the wsl image - works fully offline.&lt;/p&gt;</description></item><item><title>About Me</title><link>https://yahoon.github.io/posts/about-me/</link><pubDate>Thu, 14 May 2026 00:00:00 +0000</pubDate><guid>https://yahoon.github.io/posts/about-me/</guid><description>&lt;h2 id="bio"&gt;Bio&lt;/h2&gt;
+&lt;h3 id="yahoon-yao"&gt;&lt;strong&gt;Yahoon Yao&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;Engineer, Open Source Advocate, Tech Writer, Lifelong Learner&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;An IT veteran with 20+ years of experience across Linux, Cloud Computing, AWS, Ansible, Infrastructure Operations and DevOps fields.&lt;/p&gt;
+&lt;p&gt;Some keywords about me: &lt;strong&gt;Open Source&lt;/strong&gt; | &lt;strong&gt;Linux&lt;/strong&gt; | &lt;strong&gt;SRE&lt;/strong&gt; | &lt;strong&gt;Cloud Computing&lt;/strong&gt; | &lt;strong&gt;AWS&lt;/strong&gt; | &lt;strong&gt;GCP&lt;/strong&gt; | &lt;strong&gt;Terraform&lt;/strong&gt; | &lt;strong&gt;Golden VM image builder&lt;/strong&gt; | &lt;strong&gt;DevOps&lt;/strong&gt; | &lt;strong&gt;CI/CD&lt;/strong&gt; | &lt;strong&gt;Kubernetes&lt;/strong&gt; | &lt;strong&gt;Python&lt;/strong&gt; | &lt;strong&gt;Go&lt;/strong&gt; | &lt;strong&gt;AI coding&lt;/strong&gt; | &lt;strong&gt;Monitoring&lt;/strong&gt;&lt;/p&gt;
+&lt;h2 id="details"&gt;Details&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;20+ years of enterprise-level operations and management experience, specializing in infrastructure and application operations. Expert in full-chain operations management from process standardization to implementation, with solid theoretical foundation and extensive practical experience.&lt;/p&gt;</description></item></channel></rss>
